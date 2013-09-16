@@ -1,5 +1,22 @@
 
-body { font-family: sans-serif; }
+/* Rokkitt font acquired via Font Squirrel (http://www.fontsquirrel.com) and
+ * packaged with their very handy web font kit generator. 
+ */
+
+@font-face {
+  font-family: 'rokkittregular';
+  src: url('/fonts/rokkitt-webfont.eot');
+  src: url('/fonts/rokkitt-webfont.eot?#iefix') format('embedded-opentype'),
+       url('/fonts/rokkitt-webfont.woff') format('woff'),
+       url('/fonts/rokkitt-webfont.ttf') format('truetype'),
+       url('/fonts/rokkitt-webfont.svg#rokkittregular') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body { font-family: serif; }
+a { text-decoration: none; }
+a:hover { text-decoration: underline; }
 
 #content { 
   display: block;
@@ -9,9 +26,11 @@ body { font-family: sans-serif; }
 }
 
 #navigation { 
+  font-family: "rokkittregular";
   display: block;
   width: 25%;
   float: left;
+  font-size: 14pt;
   font-weight: bold; 
   padding: 3.5em 0 0 1em;
 }
@@ -21,15 +40,17 @@ body { font-family: sans-serif; }
 }
 
 h1 { 
-  font-size: 24pt;
+  font-family: "rokkittregular";
+  font-size: 30pt;
   text-align: right;
 }
 
 #about-me {
+  font-family: "Libre Baskerville", sans-serif;
   display: block;
   float: right;
-  width: 75%;
+  width: 70%;
   font-size: 10pt;
-  line-height: 1.2em;
+  line-height: 1.75em;
   text-align: justify;
 }
