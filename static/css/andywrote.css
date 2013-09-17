@@ -14,7 +14,14 @@
   font-style: normal;
 }
 
-body { font-family: serif; }
+body { 
+  font-family: "Libre Baskerville", "Georgia", "Times New Roman", serif; 
+  font-size: 10pt; 
+  background-image: url("/images/ckt_small.png");
+  background-repeat: repeat-y;
+  background-position: 71.5%;
+}
+
 a { text-decoration: none; }
 a:hover { text-decoration: underline; }
 
@@ -25,16 +32,16 @@ a:hover { text-decoration: underline; }
 
 #content { 
   display: block;
-  width: 70%;
+  width: 65%;
   float: left;
-  padding: 0 1em 0 0;
+  padding: 0 0 0 0;
 }
 
 #navigation { 
   display: block;
-  width: 25%;
+  width: 24%;
   float: left; 
-  padding: 3.5em 0 0 2em;
+  padding: 3.5em 0 0 10%;
 }
 
 #navigation-entries {
@@ -49,11 +56,11 @@ a:hover { text-decoration: underline; }
 #navigation-entries a { color: inherit; }
 
 #footer-credits {
-  width: 85%;
+  width: 90%;
   text-align: left;
-  font-size: 9pt;
+  font-size: 7pt;
   color: gray;
-  line-height: 1.5em;
+  line-height: 1.75em;
 }
 
 #footer-credits a { color: inherit; text-decoration: underline; }
@@ -65,11 +72,9 @@ h1 {
 }
 
 #about-me {
-  font-family: "Libre Baskerville", serif;
   display: block;
   float: right;
-  width: 70%;
-  font-size: 10pt;
+  width: 85%;
   line-height: 1.75em;
   text-align: justify;
 }
