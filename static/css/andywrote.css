@@ -18,6 +18,11 @@ body { font-family: serif; }
 a { text-decoration: none; }
 a:hover { text-decoration: underline; }
 
+#main { 
+  overflow: hidden; 
+  padding: 0 0 2.5em 0;
+}
+
 #content { 
   display: block;
   width: 70%;
@@ -26,18 +31,31 @@ a:hover { text-decoration: underline; }
 }
 
 #navigation { 
-  font-family: "rokkittregular";
   display: block;
   width: 25%;
-  float: left;
-  font-size: 14pt;
-  font-weight: bold; 
-  padding: 3.5em 0 0 1em;
+  float: left; 
+  padding: 3.5em 0 0 2em;
 }
 
 #navigation-entries {
+  font-family: "rokkittregular";
+  font-size: 14pt;
+  font-weight: bold;
   line-height: 1.5em;
+  list-style-type: none;
+  padding: 0;
 }
+
+#navigation-entries a { color: inherit; }
+
+#footer-credits {
+  width: 85%;
+  text-align: left;
+  font-size: 9pt;
+  color: gray;
+}
+
+footer a { color: inherit; text-decoration: underline; }
 
 h1 { 
   font-family: "rokkittregular";
@@ -46,11 +64,21 @@ h1 {
 }
 
 #about-me {
-  font-family: "Libre Baskerville", sans-serif;
+  font-family: "Libre Baskerville", serif;
   display: block;
   float: right;
   width: 70%;
   font-size: 10pt;
   line-height: 1.75em;
   text-align: justify;
+}
+
+#networks { 
+  padding: 1em 0.5em;
+}
+
+.account-icon {
+  height: 25px;
+  width: 25px;
+  border: none;
 }
