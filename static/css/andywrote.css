@@ -53,9 +53,10 @@ a:hover { text-decoration: underline; }
   text-align: left;
   font-size: 9pt;
   color: gray;
+  line-height: 1.5em;
 }
 
-footer a { color: inherit; text-decoration: underline; }
+#footer-credits a { color: inherit; text-decoration: underline; }
 
 h1 { 
   font-family: "rokkittregular";
