@@ -19,7 +19,7 @@ body {
   font-size: 10pt; 
   background-image: url("/images/ckt_small.png");
   background-repeat: repeat-y;
-  background-position: 71.5%;
+  background-position: 71.25% top;
 }
 
 a { text-decoration: none; }
@@ -30,11 +30,19 @@ a:hover { text-decoration: underline; }
   padding: 0 0 2.5em 0;
 }
 
-#content { 
+#content-container { 
   display: block;
   width: 65%;
   float: left;
   padding: 0 0 0 0;
+}
+
+#content {
+  display: block;
+  float: right;
+  width: 90%;
+  line-height: 1.75em;
+  text-align: justify;
 }
 
 #navigation { 
@@ -69,14 +77,6 @@ h1 {
   font-family: "rokkittregular";
   font-size: 30pt;
   text-align: right;
-}
-
-#about-me {
-  display: block;
-  float: right;
-  width: 85%;
-  line-height: 1.75em;
-  text-align: justify;
 }
 
 #networks { 

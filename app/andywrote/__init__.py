@@ -7,9 +7,8 @@ class AndyWrote(object):
 
     @cherrypy.expose
     def index(self):
-        return env.get_template('index.jinja2') \
-                  .render()
+        return env.get_template('about.jinja2').render()
 
     @cherrypy.expose
-    def about(self):
-        return "ABOUTTTTT"
+    def reading(self):
+        return env.get_template('reading.jinja2').render()
