@@ -8,13 +8,13 @@ You need Python and the packages included in `pip.manifest`. Run `python serve.p
 
 [Twiseless](https://bitbucket.org/Lawouach/twiseless/src), by [Sylvain Hellegouarch](http://www.defuze.org/), was a nice sample project to get the ball rolling with CherryPy. 
 
-[Rokkitt](http://www.fontsquirrel.com/fonts/list/foundry/vernon-adams), the slab-serif font used in headers, was created by (Vernon Adams)[http://code.newtypography.co.uk/]. 
+[Rokkitt](http://www.fontsquirrel.com/fonts/list/foundry/vernon-adams), the slab-serif font used in headers, was created by [Vernon Adams](http://code.newtypography.co.uk/). 
 
 The social media icons are from [Social Icons Pack +](http://sawb.deviantart.com/art/Social-Icons-Pack-123247215), created by [Sylwia Besz-Miazga](http://sylwiabesz.com/). 
 
 ## Licenses
 
-The files `static/font/rokkit-webfont*` are all covered by `static/fonts/rokkitt_license.txt`. The files in `static/images/icons` are covered by (Creative Commons Attribution 3.0)[http://creativecommons.org/licenses/by/3.0/us/], with the attribution stipulation 
+The files `static/font/rokkit-webfont*` are all covered by `static/fonts/rokkitt_license.txt`. The files in `static/images/icons` are covered by [Creative Commons Attribution 3.0](http://creativecommons.org/licenses/by/3.0/us/), with the attribution stipulation" 
 
 > If you use them credit me somewhere on your page (i.e. in a footer) with link to icons http://sawb.deviantart.com/art/Social-Icons-Pack-123247215
 
