@@ -14,7 +14,7 @@ The social media icons are from [Social Icons Pack +](http://sawb.deviantart.com
 
 ## Licenses
 
-The files `static/font/rokkit-webfont*` are all covered by `static/fonts/rokkitt_license.txt`. The files in `static/images/icons` are covered by [Creative Commons Attribution 3.0](http://creativecommons.org/licenses/by/3.0/us/), with the attribution stipulation" 
+The files `static/font/rokkit-webfont*` are all covered by `static/fonts/rokkitt_license.txt`. The files in `static/images/icons` are covered by [Creative Commons Attribution 3.0](http://creativecommons.org/licenses/by/3.0/us/), with the attribution stipulation: 
 
 > If you use them credit me somewhere on your page (i.e. in a footer) with link to icons http://sawb.deviantart.com/art/Social-Icons-Pack-123247215
 
