@@ -1,16 +1,18 @@
 
-# Much thanks to Sylvain Hellegouarch's sample Twiseless app, which was a great
-# help: https://bitbucket.org/Lawouach/twiseless/
+from flask import Flask, render_template
+app = Flask(__name__)
 
-from app import AndyWrote, Blog
-import cherrypy
-import os.path
+@app.route('/')
+def index():
+    return render_template('about.jinja2')
+
+@app.route('/reading/')
+def reading():
+    return render_template('reading.jinja2')
+
+@app.route('/blog/')
+def blog():
+    return render_template('blog.jinja2')
 
 if __name__ == '__main__':
-
-    site = AndyWrote()
-    site.blog = Blog()
-
-    cherrypy.tree.mount(site, config='config/andywrote.conf')
-    cherrypy.engine.start()
-    cherrypy.engine.block()
+    app.run(debug=True)

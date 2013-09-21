@@ -5,11 +5,11 @@
 
 @font-face {
   font-family: 'rokkittregular';
-  src: url('/fonts/rokkitt-webfont.eot');
-  src: url('/fonts/rokkitt-webfont.eot?#iefix') format('embedded-opentype'),
-       url('/fonts/rokkitt-webfont.woff') format('woff'),
-       url('/fonts/rokkitt-webfont.ttf') format('truetype'),
-       url('/fonts/rokkitt-webfont.svg#rokkittregular') format('svg');
+  src: url('/static/fonts/rokkitt-webfont.eot');
+  src: url('/static/fonts/rokkitt-webfont.eot?#iefix') format('embedded-opentype'),
+       url('/static/fonts/rokkitt-webfont.woff') format('woff'),
+       url('/static/fonts/rokkitt-webfont.ttf') format('truetype'),
+       url('/static/fonts/rokkitt-webfont.svg#rokkittregular') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -17,7 +17,7 @@
 body { 
   font-family: "Libre Baskerville", "Georgia", "Times New Roman", serif; 
   font-size: 10pt; 
-  background-image: url("/images/ckt_small.png");
+  background-image: url("/static/images/ckt_small.png");
   background-repeat: repeat-y;
   background-position: 71.25% top;
 }
