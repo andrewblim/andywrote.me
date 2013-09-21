@@ -79,6 +79,12 @@ h1 {
   text-align: right;
 }
 
+h2 { 
+  font-family: "rokkittregular";
+  font-size: 20pt;
+  text-align: left;
+}
+
 #networks { 
   padding: 1em 0.5em;
 }
@@ -87,4 +93,14 @@ h1 {
   height: 25px;
   width: 25px;
   border: none;
+}
+
+.author {
+  font-size: 80%;
+  text-align: right;
+}
+
+.timestamp {
+  font-size: 80%;
+  text-align: right;
 }
