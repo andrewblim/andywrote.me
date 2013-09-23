@@ -1,6 +1,11 @@
 {% macro render_field_with_errors(field) %}
   <p>
-    {{ field.label }} {{ field(**kwargs)|safe }}
+    <div class="login-field-label">
+      {{ field.label }}
+    </div>
+    <div class="login-field">
+      {{ field(**kwargs)|safe }}
+    </div>
     {% if field.errors %}
       <ul>
       {% for error in field.errors %}

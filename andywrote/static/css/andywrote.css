@@ -69,9 +69,22 @@ a:hover { text-decoration: underline; }
   font-size: 7pt;
   color: gray;
   line-height: 1.75em;
+  padding-bottom: 2em;
 }
 
 #footer-credits a { color: inherit; text-decoration: underline; }
+
+#footer-login-info {
+  width: 90%;
+  text-align: left;
+  font-size: 8pt;
+  color: black;
+  line-height: 1.75em;
+  font-weight: bold;
+}
+
+#footer-login-info a { color: inherit; text-decoration: none; }
+#footer-login-info a:hover { text-decoration: underline; }
 
 h1 { 
   font-family: "rokkittregular";
@@ -103,4 +116,14 @@ h2 {
 .timestamp {
   font-size: 80%;
   text-align: right;
+}
+
+.login-field-label {
+  width: 10em;
+  display: inline-block;
+}
+
+.login-field {
+  width: 10em;
+  display: inline-block;
 }

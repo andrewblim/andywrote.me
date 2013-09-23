@@ -4,6 +4,7 @@ from flask import Flask, request, session, g, redirect, url_for, \
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.security import Security, SQLAlchemyUserDatastore, \
     UserMixin, RoleMixin, login_required
+from flask.ext.login import current_user
 
 DEBUG      = True
 USERNAME   = 'andywrote'
@@ -16,8 +17,8 @@ SQLALCHEMY_DATABASE_URI = "postgresql://andywrote@localhost/andywrote"
 SECURITY_LOGIN_USER_TEMPLATE = "security/login_user.html"
 
 SECURITY_TRACKABLE     = True
-SECURITY_PASSWORD_HASH = 'bcrypt'
-SECURITY_PASSWORD_SALT = 'development_salt'
+SECURITY_PASSWORD_HASH = 'sha512_crypt'
+SECURITY_PASSWORD_SALT = 'developmentsalt'
 
 # all these flags are set to False, their defaults in Flask-Security, 
 # but might be useful if you ever want to make this a multi-user site
@@ -66,7 +67,19 @@ security = Security(app, user_datastore)
 
 @app.route('/')
 def about():
-    return render_template('about.html')
+    if current_user.is_anonymous():
+        email = None
+    else:
+        email = current_user.email
+    return render_template('about.html', email=email)
+
+@app.route('/blog/')
+def blog():
+    return render_template('blog.html')
+
+@app.route('/reading/')
+def reading():
+    return render_template('reading.html')
 
 if __name__ == '__main__':
     app.run()
