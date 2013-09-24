@@ -4,6 +4,20 @@
 
 You need Python and the packages included in `pip.manifest`. Run `python serve.py`. 
 
+## Miscellany
+
+Registration is disabled (this was intended as a single-user website). You can create a user from a Python prompt as follows: 
+
+```
+import andywrote
+with andywrote.app.app_context():
+    andywrote.create_user(email='your_email', name='your_name', 
+                          password='your_password')
+    andywrote.db.session.commit()
+```
+
+The app uses sha512_crypt to store passwords. 
+
 ## Credits
 
 [Twiseless](https://bitbucket.org/Lawouach/twiseless/src), by [Sylvain Hellegouarch](http://www.defuze.org/), was a nice sample project to get the ball rolling with CherryPy. 

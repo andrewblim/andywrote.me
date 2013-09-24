@@ -5,6 +5,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.security import Security, SQLAlchemyUserDatastore, \
     UserMixin, RoleMixin, login_required
 from flask.ext.login import current_user
+from flask.ext.security.utils import encrypt_password
 
 DEBUG      = True
 USERNAME   = 'andywrote'
@@ -34,22 +35,36 @@ app.config.from_object(__name__)
 
 db = SQLAlchemy(app)
 
-roles_users = db.Table('roles_users', 
-                       db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-                       db.Column('role_id', db.Integer, db.ForeignKey('role.id')))
+users_roles = db.Table(
+    'users_roles', 
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('role_id', db.Integer, db.ForeignKey('role.id'))
+)
+
+posts_authors = db.Table(
+    'posts_authors', 
+    db.Column('post_id',   db.Integer, db.ForeignKey('post.id')),
+    db.Column('author_id', db.Integer, db.ForeignKey('user.id'))
+)
+
+posts_tags = db.Table(
+    'tags', 
+    db.Column('post_id', db.Integer, db.ForeignKey('post.id')),
+    db.Column('tag_id',  db.Integer, db.ForeignKey('tag.id'))
+)
 
 class Role(db.Model, RoleMixin):
 
     id          = db.Column(db.Integer, primary_key=True)
     name        = db.Column(db.String(80), unique=True)
-    description = db.Column(db.String(255))
+    description = db.Column(db.String(200))
 
 class User(db.Model, UserMixin):
 
     id           = db.Column(db.Integer, primary_key=True)
     name         = db.Column(db.String(80))
-    email        = db.Column(db.String(255), unique=True)
-    password     = db.Column(db.String(255))
+    email        = db.Column(db.String(200), unique=True)
+    password     = db.Column(db.String(200))
     active       = db.Column(db.Boolean)
 
     last_login_at    = db.Column(db.DateTime)
@@ -58,12 +73,68 @@ class User(db.Model, UserMixin):
     current_login_ip = db.Column(db.String(40))
     login_count      = db.Column(db.Integer)
 
-    roles        = db.relationship('Role', secondary=roles_users, 
-                                   backref=db.backref('users', lazy='dynamic'))
+    roles = db.relationship(
+        'Role', 
+        secondary=users_roles, 
+        backref=db.backref('users', lazy='dynamic')
+    )
+
+    def __repr__(self):
+        return '<User %d: %s>' % (self.id, self.email)
+
+class Post(db.Model):
+
+    id         = db.Column(db.Integer, primary_key=True)
+    title      = db.Column(db.String(300))
+    body       = db.Column(db.Text)
+    created_at = db.Column(db.DateTime)
+    updated_at = db.Column(db.DateTime)
+
+    authors = db.relationship(
+        'User', 
+        secondary=posts_authors,
+        backref=db.backref('posts', lazy='dynamic')
+    )
+
+    tags = db.relationship(
+        'Tag',
+        secondary=posts_tags,
+        backref=db.backref('tags', lazy='dynamic')
+    )
+
+    def __init__(self, title, body):
+        self.title = title
+        self.body  = body
+
+    def __repr__(self):
+        return '<Post %d: %s>' % (self.id, self.title)
+
+
+class Tag(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80))
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return '<Tag %d: %s>' % (self.id, self.name)
+
 
 # Set up Flask-Security
+
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)
+
+def create_user(email, name, password):
+    user_datastore.create_user(
+        email=email,
+        name=name,
+        password=encrypt_password(password)
+    )
+
+# Routes
 
 @app.route('/')
 def about():
