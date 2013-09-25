@@ -2,7 +2,7 @@
 {% block title %}andywrote.me | blog{% endblock %}
 {% block content %}
 <h2>New post</h2>
-<form method="POST" action="/blog/write/submit">
+<form method="POST" action="/blog/write">
   {{ form.hidden_tag() }}
   {{ form.title(id="write-title", placeholder="Title (plaintext)") }}
   {%- if form.title.errors -%}

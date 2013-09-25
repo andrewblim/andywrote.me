@@ -172,7 +172,7 @@ def blog():
 def blog_write():
     return render_template('blog/write.html', form=WriteForm())
 
-@app.route('/blog/write/submit', methods=["POST"])
+@app.route('/blog/write', methods=["POST"])
 @login_required
 def blog_submit_post():
     form = WriteForm()
