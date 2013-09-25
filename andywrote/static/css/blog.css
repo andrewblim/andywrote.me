@@ -1,0 +1,17 @@
+
+#write-title {
+  width: 100%;
+  font-size: 14pt;
+  margin-bottom: 1em;
+  outline: none;
+  display: block;
+}
+
+#write-body {
+  width: 100%;
+  height: 20em;
+  font-size: 10pt;
+  resize: none;
+  margin-bottom: 1em;
+  display: block;
+}

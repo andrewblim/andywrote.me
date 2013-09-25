@@ -1,0 +1,11 @@
+{% extends "blog/base.html" %}
+{% block title %}andywrote.me | blog{% endblock %}
+{% block content %}
+<h2>New post</h2>
+<form>
+  <input id="write-title" type="text" placeholder="Title (plaintext)" />
+  <textarea id="write-body" placeholder="Whatever you have to say here (HTML, though it will be sanitized)"></textarea>
+  <input type="button" value="Preview" />
+  <input type="submit" value="Post" />
+</form>
+{% endblock %}

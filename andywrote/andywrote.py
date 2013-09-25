@@ -149,7 +149,17 @@ def about():
 
 @app.route('/blog/')
 def blog():
-    return render_template('blog.html')
+    return render_template('blog/index.html')
+
+@app.route('/blog/write/')
+@login_required
+def blog_write():
+    return render_template('blog/write.html')
+
+@app.route('/blog/manage/')
+@login_required
+def blog_manage():
+    return render_template('blog/manage.html')
 
 if __name__ == '__main__':
     app.run()
