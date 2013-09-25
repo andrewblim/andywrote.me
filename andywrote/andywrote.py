@@ -151,9 +151,5 @@ def about():
 def blog():
     return render_template('blog.html')
 
-@app.route('/reading/')
-def reading():
-    return render_template('reading.html')
-
 if __name__ == '__main__':
     app.run()
