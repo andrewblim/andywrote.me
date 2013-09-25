@@ -13,7 +13,7 @@ SECRET_KEY = 'development_key'
 
 SQLALCHEMY_DATABASE_URI = "postgresql://andywrote@localhost/andywrote"
 
-## Flask-Security
+## Flask-Security config
 
 SECURITY_LOGIN_USER_TEMPLATE = "security/login_user.html"
 
@@ -29,11 +29,13 @@ SECURITY_REGISTERABLE = False
 SECURITY_RECOVERABLE  = False
 SECURITY_CHANGEABLE   = False
 
+# Set up app
 
 app = Flask(__name__)
 app.config.from_object(__name__)
-
 db = SQLAlchemy(app)
+
+# Schema/models
 
 users_roles = db.Table(
     'users_roles', 
@@ -121,11 +123,12 @@ class Tag(db.Model):
     def __repr__(self):
         return '<Tag %d: %s>' % (self.id, self.name)
 
-
 # Set up Flask-Security
 
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)
+
+# Functions
 
 def create_user(email, name, password):
     user_datastore.create_user(

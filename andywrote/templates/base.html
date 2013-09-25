@@ -16,6 +16,18 @@
     <div id="content-container">
       <h1>andywrote.me</h1>
 
+      {%- with messages = get_flashed_messages(with_categories=true) -%}
+        {% if messages %}
+          <div id="flashes">
+            <ul>
+              {% for category, message in messages -%}
+                <li class="flash {{ category }}">{{ message }}</li>
+              {%- endfor %}
+            </ul>
+          </div>
+        {% endif %}
+      {%- endwith %}
+
       <div id="content">
       {% block content %}
       {% endblock %}
@@ -41,9 +53,12 @@
       </div>
       {% if not current_user.is_anonymous() %}
       <div id="footer-login-info">
-        {{ current_user.email }}
-        <br/>
-        <a href="/logout">➢ Log me out</a>
+        <p>{{ current_user.email }}</p>
+        <ul id="footer-login-action-list">
+          <li class="footer-login-action"><a href="/blog/write">Write a blog post</a></li>
+          <li class="footer-login-action"><a href="/blog/manage">Manage blog posts</a></li>
+          <li class="footer-login-action"><a href="/logout">Log me out</a></li>
+        </ul>
       </div>
       {% endif %}
     </div>

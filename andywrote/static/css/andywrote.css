@@ -37,6 +37,19 @@ a:hover { text-decoration: underline; }
   padding: 0 0 0 0;
 }
 
+#flashes {
+  display: block;
+  float: right;
+  width: 90%;
+  background-color: bisque;
+  line-height: 1.75em;
+  text-align: justify;
+}
+
+#flash-list {
+
+}
+
 #content {
   display: block;
   float: right;
@@ -85,6 +98,8 @@ a:hover { text-decoration: underline; }
 
 #footer-login-info a { color: inherit; text-decoration: none; }
 #footer-login-info a:hover { text-decoration: underline; }
+
+#footer-login-action-list { padding-left: 2em; }
 
 h1 { 
   font-family: "rokkittregular";
