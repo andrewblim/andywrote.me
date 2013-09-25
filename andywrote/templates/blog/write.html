@@ -2,10 +2,32 @@
 {% block title %}andywrote.me | blog{% endblock %}
 {% block content %}
 <h2>New post</h2>
-<form>
-  <input id="write-title" type="text" placeholder="Title (plaintext)" />
-  <textarea id="write-body" placeholder="Whatever you have to say here (HTML, though it will be sanitized)"></textarea>
-  <input type="button" value="Preview" />
+<form method="POST" action="/blog/write/submit">
+  {{ form.hidden_tag() }}
+  {{ form.title(id="write-title", placeholder="Title (plaintext)") }}
+  {%- if form.title.errors -%}
+    <ul class="submit-error-list">
+      {%- for error in form.title.errors -%}
+        <li class="submit-error">{{ error }}</li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+  {{ form.tag_list(id="write-tags", placeholder="Tags (comma-separated)") }}
+  {%- if form.tag_list.errors -%}
+    <ul class="submit-error-list">
+      {%- for error in form.tag_list.errors -%}
+        <li class="submit-error">{{ error }}</li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+  {{ form.body(id="write-body", placeholder="Whatever you have to say here (HTML, though it will be sanitized)") }}
+  {%- if form.body.errors -%}
+    <ul class="submit-error-list">
+      {%- for error in form.body.errors -%}
+        <li class="submit-error">{{ error }}</li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
   <input type="submit" value="Post" />
 </form>
 {% endblock %}

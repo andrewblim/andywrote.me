@@ -7,6 +7,12 @@ from flask.ext.security import Security, SQLAlchemyUserDatastore, \
 from flask.ext.login import current_user
 from flask.ext.security.utils import encrypt_password
 
+from flask_wtf import Form
+from wtforms import StringField, TextAreaField, validators
+
+import bleach
+import re
+
 DEBUG      = True
 USERNAME   = 'andywrote'
 SECRET_KEY = 'development_key'
@@ -115,7 +121,7 @@ class Post(db.Model):
 class Tag(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80))
+    name = db.Column(db.String(80), unique=True)
 
     def __init__(self, name):
         self.name = name
@@ -137,6 +143,16 @@ def create_user(email, name, password):
         password=encrypt_password(password)
     )
 
+# Forms
+
+class WriteForm(Form):
+    title    = StringField(u'Title', \
+        [validators.Length(min=1, max=300, \
+            message=u'Your title must contain at least 1 character and no more than 300 characters.') \
+        ])
+    tag_list = StringField(u'Tags')
+    body     = TextAreaField(u'Body')
+
 # Routes
 
 @app.route('/')
@@ -151,12 +167,29 @@ def about():
 def blog():
     return render_template('blog/index.html')
 
-@app.route('/blog/write/')
+@app.route('/blog/write')
 @login_required
 def blog_write():
-    return render_template('blog/write.html')
+    return render_template('blog/write.html', form=WriteForm())
 
-@app.route('/blog/manage/')
+@app.route('/blog/write/submit', methods=["POST"])
+@login_required
+def blog_submit_post():
+    form = WriteForm()
+    if form.validate_on_submit():
+        flash(u'Successfully posted: %s' % form.title.data, category='blog')
+        return redirect('/blog')
+    return render_template('blog/write.html', form=form)
+    # title = bleach.clean(request.form['write_title'])
+    # tags  = bleach.clean(request.form['write_tags'])
+    # tags  = re.sub('\s+', ' ', tags)
+    # tags  = re.split('\s?,\s?', tags)
+    # body  = bleach.clean(request.form['write_body'])
+    # new_post = Post(title=title, body=body)
+    # db.session.add(new_post)
+    # db.session.commit()
+
+@app.route('/blog/manage')
 @login_required
 def blog_manage():
     return render_template('blog/manage.html')
