@@ -11,6 +11,7 @@ from flask_wtf import Form
 from wtforms import StringField, TextAreaField, validators
 
 import bleach
+import datetime
 import re
 
 DEBUG      = True
@@ -110,9 +111,13 @@ class Post(db.Model):
         backref=db.backref('tags', lazy='dynamic')
     )
 
-    def __init__(self, title, body):
-        self.title = title
-        self.body  = body
+    def __init__(self, title, body, authors=[], tags=[],
+                 created_at=datetime.datetime.now(),
+                 updated_at=datetime.datetime.now()):
+        self.title      = title
+        self.body       = body
+        self.created_at = created_at
+        self.updated_at = updated_at
 
     def __repr__(self):
         return '<Post %d: %s>' % (self.id, self.title)
@@ -165,7 +170,8 @@ def about():
 
 @app.route('/blog/')
 def blog():
-    return render_template('blog/index.html')
+    posts = Post.query.order_by(Post.created_at.desc()).all()
+    return render_template('blog/index.html', posts=posts)
 
 @app.route('/blog/write')
 @login_required
@@ -177,17 +183,27 @@ def blog_write():
 def blog_submit_post():
     form = WriteForm()
     if form.validate_on_submit():
+        title    = bleach.clean(form.title.data)
+        tag_list = bleach.clean(form.tag_list.data)
+        tag_list = re.sub('\s+', ' ', tag_list)
+        tag_list = re.split('\s?,\s?', tag_list)
+        body  = bleach.clean(form.body.data)
+
+        new_post = Post(title=title, body=body, authors=[current_user])
+        for tag_name in tag_list:
+            tag = Tag.query.filter_by(name=tag_name).first()
+            if tag is None:
+                tag = Tag(name=tag_name)
+                db.session.add(tag)
+            new_post.tags.append(tag)
+        db.session.add(new_post)
+        db.session.commit()
         flash(u'Successfully posted: %s' % form.title.data, category='blog')
         return redirect('/blog')
+
+    else:
+        flash(u'There were errors in your submission, please check below.')
     return render_template('blog/write.html', form=form)
-    # title = bleach.clean(request.form['write_title'])
-    # tags  = bleach.clean(request.form['write_tags'])
-    # tags  = re.sub('\s+', ' ', tags)
-    # tags  = re.split('\s?,\s?', tags)
-    # body  = bleach.clean(request.form['write_body'])
-    # new_post = Post(title=title, body=body)
-    # db.session.add(new_post)
-    # db.session.commit()
 
 @app.route('/blog/manage')
 @login_required

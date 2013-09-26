@@ -1,7 +1,19 @@
 {% extends "blog/base.html" %}
 {% block title %}andywrote.me | blog{% endblock %}
 {% block content %}
+{%- if posts is not defined or 
+       posts is none or 
+       posts is not iterable or 
+       posts|length == 0 -%}
 <p>
-  Blog placeholder.
+  No posts.
 </p>
+{%- else -%}
+  {%- for post in posts -%}
+    <div class="post">
+      <h2>{{ post.title|safe }}</h2>
+      {{ post.body|safe }}
+    </div>
+  {%- endfor -%}
+{%- endif -%}
 {% endblock %}

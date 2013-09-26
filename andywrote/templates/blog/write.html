@@ -20,7 +20,7 @@
       {%- endfor -%}
     </ul>
   {%- endif -%}
-  {{ form.body(id="write-body", placeholder="Whatever you have to say here (HTML, though it will be sanitized)") }}
+  {{ form.body(id="write-body", placeholder="Whatever you have to say (HTML, though it will be sanitized)") }}
   {%- if form.body.errors -%}
     <ul class="submit-error-list">
       {%- for error in form.body.errors -%}
