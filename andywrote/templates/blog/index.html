@@ -16,7 +16,12 @@
         {{ post.body|safe }}
       </div>
       <div class="post-footer">
-        {{ post.created_at.strftime('%d %b %Y, %I:%M %p') }}
+        {{ post.created_at.strftime('%d %b %Y, %I:%M %p') }}<br/>
+        Tags: 
+        {% for tag in post.tags -%}
+          {{ tag.name }}
+          {%- if not loop.last -%}, {% endif -%}
+        {%- endfor -%}
       </div>
     </article>
   {%- endfor -%}

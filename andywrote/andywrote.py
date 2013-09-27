@@ -224,7 +224,7 @@ def blog_submit_post():
         slug = slug_stem
         while Post.query.filter_by(slug=slug).first() is not None:
             slug = "%s-%d" % (slug_stem, slug_number)
-            slug_stem += 1
+            slug_number += 1
         if len(slug) > 75:
             raise Exception("Somewhat improbably, you've used a title repeated too many times to generate a slug.")
 
