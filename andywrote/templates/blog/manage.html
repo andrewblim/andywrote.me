@@ -2,7 +2,33 @@
 {% block title %}andywrote.me | blog{% endblock %}
 {% block content %}
 <h2>Manage posts</h2>
+{%- if posts is not defined or 
+       posts is none or 
+       posts is not iterable or 
+       posts|length == 0 -%}
 <p>
-  Blog post management placeholder.
+  No posts.
 </p>
+{%- else -%}
+  <table id="manage-posts">
+    {%- for post in posts -%}
+      <tr class="manage-posts-entry-{{ loop.index0 % 2 }}">
+        <td class="manage-posts-title">{{ post.title|safe }}</td>
+        <td class="manage-posts-authors">
+          {%- for author in post.authors -%}
+            <div>{{ author.name }}</div>
+          {%- endfor -%}
+        </td>
+        <td class="manage-posts-timestamp">
+          <div>{{ post.created_at.strftime('%d %b %Y') }}</div>
+          <div>{{ post.created_at.strftime('%I:%M %p') }}</div>
+        </td>
+        <td class="manage-posts-actions">
+          <div>Edit</div>
+          <div>Delete</div>
+        </td>
+      </tr>
+    {%- endfor -%}
+  </table>
+{%- endif -%}
 {% endblock %}

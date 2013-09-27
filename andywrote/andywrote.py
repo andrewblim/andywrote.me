@@ -180,17 +180,39 @@ def blog():
 def blog_write():
     return render_template('blog/write.html', form=WriteForm())
 
+allowed_tags_body = [
+    'a', 
+    'abbr', 
+    'acronym', 
+    'address',
+    'b', 
+    'blockquote', 
+    'br',
+    'cite',
+    'code', 
+    'del',
+    'em', 
+    'i', 
+    'li', 
+    'ol',
+    'p',
+    'pre', 
+    'q',
+    'strong',
+    'ul',
+]
+
 @app.route('/blog/write', methods=["POST"])
 @login_required
 def blog_submit_post():
     form = WriteForm()
     if form.validate_on_submit():
 
-        title    = bleach.clean(form.title.data)
-        tag_list = bleach.clean(form.tag_list.data)
+        title    = bleach.clean(form.title.data, tags=[])
+        tag_list = bleach.clean(form.tag_list.data, tags=[])
         tag_list = re.sub('\s+', ' ', tag_list)
         tag_list = set(re.split('\s?,\s?', tag_list))
-        body     = bleach.clean(form.body.data)
+        body     = bleach.clean(form.body.data, tags=allowed_tags_body)
 
         slug_stem = re.sub('\s', '-', title)
         slug_stem = re.sub('[^A-Za-z\-]', '', slug_stem)
@@ -223,7 +245,8 @@ def blog_submit_post():
 @app.route('/blog/manage')
 @login_required
 def blog_manage():
-    return render_template('blog/manage.html')
+    posts = Post.query.order_by(Post.created_at.desc()).all()
+    return render_template('blog/manage.html', posts=posts)
 
 if __name__ == '__main__':
     app.run()

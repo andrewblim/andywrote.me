@@ -3,7 +3,6 @@
 - Add routes/views for individual blog posts
 - Add routes/views for tags
 - Add routes/views for authors
-- Add post maangement page
 - Modify write page to edit existing posts
-- Deal with allowable tags more carefully
+- Finish blog management page
 - Add image uploader
