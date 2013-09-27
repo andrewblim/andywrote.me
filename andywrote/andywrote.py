@@ -117,7 +117,10 @@ class Post(db.Model):
                  created_at=datetime.datetime.now(),
                  updated_at=datetime.datetime.now()):
         self.title      = title
+        self.slug       = slug
         self.body       = body
+        self.authors    = authors
+        self.tags       = tags
         self.created_at = created_at
         self.updated_at = updated_at
 
