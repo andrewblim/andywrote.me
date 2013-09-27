@@ -9,8 +9,9 @@ from flask.ext.security.utils import encrypt_password
 
 from flask_wtf import Form
 from wtforms import StringField, TextAreaField, validators
+from wtforms.validators import ValidationError
 
-import bleach
+import bleach, lxml
 import datetime
 import re
 
@@ -144,7 +145,7 @@ class Tag(db.Model):
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)
 
-# Functions
+# Functions/helper definitions
 
 def create_user(email, name, password):
     user_datastore.create_user(
@@ -153,12 +154,47 @@ def create_user(email, name, password):
         password=encrypt_password(password)
     )
 
+def generate_slug(text):
+    slug_stem = re.sub('\s', '-', text)
+    slug_stem = re.sub('[^A-Za-z\-]', '', slug_stem)
+    slug_stem = slug_stem.lower()[:70]
+    slug_number = 1
+    slug = slug_stem
+    while Post.query.filter_by(slug=slug).first() is not None:
+        slug = "%s-%d" % (slug_stem, slug_number)
+        slug_number += 1
+    return slug
+
+allowed_tags_body = [
+    'a', 
+    'abbr', 
+    'acronym', 
+    'address',
+    'b', 
+    'blockquote', 
+    'br',
+    'cite',
+    'code', 
+    'del',
+    'em', 
+    'i', 
+    'li', 
+    'ol',
+    'p',
+    'pre', 
+    'q',
+    'strong',
+    'ul',
+]
+
 # Forms
 
 class WriteForm(Form):
+
     title    = StringField(u'Title', \
-        [validators.Length(min=1, max=300, \
-            message=u'Your title must contain at least 1 character and no more than 300 characters.') \
+        [validators.Length(
+            min=1, max=300,
+            message=u'Your title must contain at least 1 character and no more than 300 characters.')
         ])
     tag_list = StringField(u'Tags')
     body     = TextAreaField(u'Body')
@@ -183,66 +219,54 @@ def blog():
 def blog_write():
     return render_template('blog/write.html', form=WriteForm())
 
-allowed_tags_body = [
-    'a', 
-    'abbr', 
-    'acronym', 
-    'address',
-    'b', 
-    'blockquote', 
-    'br',
-    'cite',
-    'code', 
-    'del',
-    'em', 
-    'i', 
-    'li', 
-    'ol',
-    'p',
-    'pre', 
-    'q',
-    'strong',
-    'ul',
-]
-
 @app.route('/blog/write', methods=["POST"])
 @login_required
 def blog_submit_post():
     form = WriteForm()
-    if form.validate_on_submit():
+    if form.is_submitted():
 
-        title    = bleach.clean(form.title.data, tags=[])
-        tag_list = bleach.clean(form.tag_list.data, tags=[])
-        tag_list = re.sub('\s+', ' ', tag_list)
-        tag_list = set(re.split('\s?,\s?', tag_list))
-        body     = bleach.clean(form.body.data, tags=allowed_tags_body)
+        # pre-validation sanitization
+        form.title.data    = bleach.clean(form.title.data, tags=[])
+        form.tag_list.data = bleach.clean(form.tag_list.data, tags=[])
+        form.tag_list.data = re.sub('\s+', ' ', form.tag_list.data).strip()
+        form.body.data     = bleach.clean(form.body.data, tags=allowed_tags_body)
 
-        slug_stem = re.sub('\s', '-', title)
-        slug_stem = re.sub('[^A-Za-z\-]', '', slug_stem)
-        slug_stem = slug_stem.lower()[:70]
-        slug_number = 1
-        slug = slug_stem
-        while Post.query.filter_by(slug=slug).first() is not None:
-            slug = "%s-%d" % (slug_stem, slug_number)
-            slug_number += 1
-        if len(slug) > 75:
-            raise Exception("Somewhat improbably, you've used a title repeated too many times to generate a slug.")
+        if form.validate():
+            try:
+                tag_list = set(re.split('\s?,\s?', form.tag_list.data))
+                if len(tag_list) == 1 and '' in tag_list:
+                    tag_list = set([])
 
-        new_post = Post(title=title, body=body, slug=slug,
-                        authors=[current_user])
-        for tag_name in tag_list:
-            tag = Tag.query.filter_by(name=tag_name).first()
-            if tag is None:
-                tag = Tag(name=tag_name)
-                db.session.add(tag)
-            new_post.tags.append(tag)
-        db.session.add(new_post)
-        db.session.commit()
-        flash(u'Successfully posted: %s' % form.title.data, category='blog')
-        return redirect('/blog')
+                # slug generation
+                slug = generate_slug(form.title.data)
+                if len(slug) > 75:
+                    form.title.errors.append("Couldn't generate a slug for title - try a different title.")
+                    raise ValidationError
 
-    else:
-        flash(u'There were errors in your submission, please check below.')
+                # add the post
+                new_post = Post(title=form.title.data, 
+                                body=form.body.data, 
+                                slug=slug,
+                                authors=[current_user])
+                for tag_name in tag_list:
+                    tag = Tag.query.filter_by(name=tag_name).first()
+                    if tag is None:
+                        tag = Tag(name=tag_name)
+                        db.session.add(tag)
+                    new_post.tags.append(tag)
+                db.session.add(new_post)
+                db.session.commit()
+
+                # redirect to blog
+                flash(u'Successfully posted: %s' % form.title.data, category='blog')
+                return redirect('/blog')
+
+            except ValidationError:
+                pass
+        else:
+            pass
+            
+    flash(u'There were errors in your submission. Please check below.')
     return render_template('blog/write.html', form=form)
 
 @app.route('/blog/manage')
