@@ -57,7 +57,7 @@ posts_authors = db.Table(
 )
 
 posts_tags = db.Table(
-    'tags', 
+    'posts_tags', 
     db.Column('post_id', db.Integer, db.ForeignKey('post.id')),
     db.Column('tag_id',  db.Integer, db.ForeignKey('tag.id'))
 )
@@ -95,6 +95,7 @@ class Post(db.Model):
 
     id         = db.Column(db.Integer, primary_key=True)
     title      = db.Column(db.String(300))
+    slug       = db.Column(db.String(50), unique=True)
     body       = db.Column(db.Text)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
@@ -111,7 +112,8 @@ class Post(db.Model):
         backref=db.backref('tags', lazy='dynamic')
     )
 
-    def __init__(self, title, body, authors=[], tags=[],
+    def __init__(self, title, slug, body, 
+                 authors=[], tags=[],
                  created_at=datetime.datetime.now(),
                  updated_at=datetime.datetime.now()):
         self.title      = title
@@ -183,13 +185,26 @@ def blog_write():
 def blog_submit_post():
     form = WriteForm()
     if form.validate_on_submit():
+
         title    = bleach.clean(form.title.data)
         tag_list = bleach.clean(form.tag_list.data)
         tag_list = re.sub('\s+', ' ', tag_list)
-        tag_list = re.split('\s?,\s?', tag_list)
-        body  = bleach.clean(form.body.data)
+        tag_list = set(re.split('\s?,\s?', tag_list))
+        body     = bleach.clean(form.body.data)
 
-        new_post = Post(title=title, body=body, authors=[current_user])
+        slug_stem = re.sub('\s', '-', title)
+        slug_stem = re.sub('[^A-Za-z\-]', '', slug_stem)
+        slug_stem = slug_stem.lower()[:70]
+        slug_number = 1
+        slug = slug_stem
+        while Post.query.filter_by(slug=slug).first() is not None:
+            slug = "%s-%d" % (slug_stem, slug_number)
+            slug_stem += 1
+        if len(slug) > 75:
+            raise Exception("Somewhat improbably, you've used a title repeated too many times to generate a slug.")
+
+        new_post = Post(title=title, body=body, slug=slug,
+                        authors=[current_user])
         for tag_name in tag_list:
             tag = Tag.query.filter_by(name=tag_name).first()
             if tag is None:

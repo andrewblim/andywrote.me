@@ -7,4 +7,3 @@
 - Modify write page to edit existing posts
 - Deal with allowable tags more carefully
 - Add image uploader
-- Add database migration (Alembic?)

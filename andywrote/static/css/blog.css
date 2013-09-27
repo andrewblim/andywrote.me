@@ -37,3 +37,9 @@ input[type=text]:focus, textarea:focus {
   margin-bottom: 1em;
   display: block;
 }
+
+.post-body { margin-left: 2em; }
+.post-footer {
+  font-size: 80%;
+  text-align: right;
+}
