@@ -20,11 +20,10 @@ The app uses sha512_crypt to store passwords.
 
 ## Credits
 
-[Twiseless](https://bitbucket.org/Lawouach/twiseless/src), by [Sylvain Hellegouarch](http://www.defuze.org/), was a nice sample project to get the ball rolling with CherryPy. 
-
-[Rokkitt](http://www.fontsquirrel.com/fonts/list/foundry/vernon-adams), the slab-serif font used in headers, was created by [Vernon Adams](http://code.newtypography.co.uk/). 
-
-The social media icons are from [Social Icons Pack +](http://sawb.deviantart.com/art/Social-Icons-Pack-123247215), created by [Sylwia Besz-Miazga](http://sylwiabesz.com/). 
+- [Rokkitt](http://www.fontsquirrel.com/fonts/list/foundry/vernon-adams) font by Vernon Adams. 
+- [Libre Baskerville](http://www.google.com/fonts/specimen/Libre+Baskerville) by [Impallari Type](http://www.impallari.com/) via Google Fonts. 
+- [Social network icons](http://sawb.deviantart.com/art/Social-Icons-Pack-123247215) by Sylwia Besz-Miazga. 
+- Background created with Doug Zongker's [Celtic Knot Thingy](http://isotropic.org/celticknot/). 
 
 ## Licenses
 
