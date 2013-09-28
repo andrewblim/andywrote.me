@@ -96,7 +96,7 @@ class Post(db.Model):
 
     id         = db.Column(db.Integer, primary_key=True)
     title      = db.Column(db.String(300))
-    slug       = db.Column(db.String(50), unique=True)
+    slug       = db.Column(db.String(80), unique=True)
     body       = db.Column(db.Text)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
@@ -131,11 +131,13 @@ class Post(db.Model):
 
 class Tag(db.Model):
 
-    id = db.Column(db.Integer, primary_key=True)
+    id   = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True)
+    slug = db.Column(db.String(80), unique=True)
 
-    def __init__(self, name):
+    def __init__(self, name, slug):
         self.name = name
+        self.slug = slug
 
     def __repr__(self):
         return '<Tag %d: %s>' % (self.id, self.name)
@@ -154,10 +156,10 @@ def create_user(email, name, password):
         password=encrypt_password(password)
     )
 
-def generate_slug(text):
+def generate_slug(text, field_length=80):
     slug_stem = re.sub('\s', '-', text)
     slug_stem = re.sub('[^A-Za-z\-]', '', slug_stem)
-    slug_stem = slug_stem.lower()[:70]
+    slug_stem = slug_stem.lower()[:(field_length-5)]
     slug_number = 1
     slug = slug_stem
     while Post.query.filter_by(slug=slug).first() is not None:
@@ -238,26 +240,30 @@ def blog_submit_post():
                     tag_list = set([])
 
                 # slug generation
-                slug = generate_slug(form.title.data)
-                if len(slug) > 75:
+                slug_title = generate_slug(form.title.data)
+                if len(slug_title) > 50:
                     form.title.errors.append("Couldn't generate a slug for title - try a different title.")
                     raise ValidationError
 
                 # add the post
                 new_post = Post(title=form.title.data, 
                                 body=form.body.data, 
-                                slug=slug,
+                                slug=slug_title,
                                 authors=[current_user])
                 for tag_name in tag_list:
                     tag = Tag.query.filter_by(name=tag_name).first()
                     if tag is None:
-                        tag = Tag(name=tag_name)
+                        slug_tag = generate_slug(tag_name)
+                        if len(slug_tag) > 50:
+                            form.tag_list.errors.append("Couldn't generate a slug for tag %s - try a different title." % tag_name)
+                            raise ValidationError
+                        tag = Tag(name=tag_name,
+                                  slug=slug_tag)
                         db.session.add(tag)
                     new_post.tags.append(tag)
+
                 db.session.add(new_post)
                 db.session.commit()
-
-                # redirect to blog
                 flash(u'Successfully posted: %s' % form.title.data, category='blog')
                 return redirect('/blog')
 
