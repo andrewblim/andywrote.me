@@ -42,6 +42,8 @@ article {
   margin-bottom: 5em;
 }
 
+h2.post-title a { color: inherit; }
+
 .post-body { 
   margin-left: 0em; 
   margin-bottom: 2.25em; 

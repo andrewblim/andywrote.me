@@ -10,22 +10,7 @@
 </p>
 {%- else -%}
   {%- for post in posts -%}
-    <article>
-      <h2>{{ post.title|safe }}</h2>
-      <div class="post-body">
-        {{ post.body|safe }}
-      </div>
-      <div class="post-footer">
-        {{ post.created_at.strftime('%d %b %Y, %I:%M %p') }}
-        {%- if post.tags|length > 0 -%}
-          <br/>Tags: 
-          {% for tag in post.tags -%}
-            {{ tag.name }}
-            {%- if not loop.last -%}, {% endif -%}
-          {%- endfor -%}
-        {%- endif -%}
-      </div>
-    </article>
+    {%- include 'blog/_post_individual.html' -%}
   {%- endfor -%}
 {%- endif -%}
 {% endblock %}

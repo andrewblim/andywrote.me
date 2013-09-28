@@ -265,7 +265,7 @@ def blog_submit_post():
                 pass
         else:
             pass
-            
+
     flash(u'There were errors in your submission. Please check below.')
     return render_template('blog/write.html', form=form)
 
@@ -274,6 +274,13 @@ def blog_submit_post():
 def blog_manage():
     posts = Post.query.order_by(Post.created_at.desc()).all()
     return render_template('blog/manage.html', posts=posts)
+
+@app.route('/blog/posts/<post_slug>')
+def blog_post(post_slug):
+    post = Post.query.filter_by(slug=post_slug).first()
+    if post is None:
+        abort(404)
+    return render_template('blog/post.html', post=post)
 
 if __name__ == '__main__':
     app.run()
