@@ -1,6 +1,9 @@
 {% extends "blog/base.html" %}
 {% block title %}andywrote.me | blog{% endblock %}
 {% block content %}
+{%- if tag_view is defined -%}
+  <div class="tag-view">Posts tagged with: <span class="tag-view-tag">{{ tag_view }}</span></div>
+{%- endif -%}
 {%- if posts is not defined or 
        posts is none or 
        posts is not iterable or 

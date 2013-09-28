@@ -230,7 +230,8 @@ def blog_submit_post():
         # pre-validation sanitization
         form.title.data    = bleach.clean(form.title.data, tags=[])
         form.tag_list.data = bleach.clean(form.tag_list.data, tags=[])
-        form.tag_list.data = re.sub('\s+', ' ', form.tag_list.data).strip()
+        form.tag_list.data = re.sub('\s+', ' ', form.tag_list.data) \
+                             .strip()
         form.body.data     = bleach.clean(form.body.data, tags=allowed_tags_body)
 
         if form.validate():
@@ -278,15 +279,27 @@ def blog_submit_post():
 @app.route('/blog/manage')
 @login_required
 def blog_manage():
-    posts = Post.query.order_by(Post.created_at.desc()).all()
+    posts = Post.query.order_by(Post.created_at.desc()) \
+                      .all()
     return render_template('blog/manage.html', posts=posts)
 
 @app.route('/blog/posts/<post_slug>')
 def blog_post(post_slug):
-    post = Post.query.filter_by(slug=post_slug).first()
+    post = Post.query.filter_by(slug=post_slug) \
+                     .first()
     if post is None:
         abort(404)
     return render_template('blog/post.html', post=post)
+
+@app.route('/blog/tags/<tag_slug>')
+def blog_posts_by_tag(tag_slug):
+    tag = Tag.query.filter_by(slug=tag_slug).first()
+    posts = Post.query.filter(Post.tags.any(Tag.id == tag.id)) \
+                      .order_by(Post.created_at.desc()) \
+                      .all()
+    return render_template('blog/index.html', 
+                            posts=posts, 
+                            tag_view=tag.name)
 
 if __name__ == '__main__':
     app.run()
