@@ -47,6 +47,10 @@ input[type=text]:focus, textarea:focus {
   display: block;
 }
 
+.write-options {
+  margin-bottom: 1em;
+}
+
 article {
   margin-bottom: 5em;
 }

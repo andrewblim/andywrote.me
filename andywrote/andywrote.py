@@ -8,10 +8,11 @@ from flask.ext.login import current_user
 from flask.ext.security.utils import encrypt_password
 
 from flask_wtf import Form
-from wtforms import StringField, TextAreaField, validators
+from wtforms import StringField, TextAreaField, BooleanField, validators
 from wtforms.validators import ValidationError
 
-import bleach, lxml
+import bleach
+from lxml import etree
 import datetime
 import re
 
@@ -201,6 +202,8 @@ class WriteForm(Form):
     tag_list = StringField(u'Tags')
     body     = TextAreaField(u'Body')
 
+    convert_breaks = BooleanField(u'Convert line breaks to &lt;p&gt;')
+
 # Routes
 
 @app.route('/')
@@ -228,34 +231,45 @@ def blog_submit_post():
     if form.is_submitted():
 
         # pre-validation sanitization
-        form.title.data    = bleach.clean(form.title.data, tags=[])
-        form.tag_list.data = bleach.clean(form.tag_list.data, tags=[])
-        form.tag_list.data = re.sub('\s+', ' ', form.tag_list.data) \
+        title    = bleach.clean(form.title.data, tags=[])
+        tag_list = bleach.clean(form.tag_list.data, tags=[])
+        tag_list = re.sub('\s+', ' ', tag_list) \
                              .strip()
-        form.body.data     = bleach.clean(form.body.data, tags=allowed_tags_body)
+        body     = bleach.clean(form.body.data, tags=allowed_tags_body)
 
         if form.validate():
             try:
-                tag_list = set(re.split('\s?,\s?', form.tag_list.data))
+
+                if form.convert_breaks.data:
+                    body = re.sub('\n+', '</p><p>', body)
+                    body = "<p>%s</p>" % body
+
+                try:
+                    etree.fromstring(body)
+                except etree.XMLSyntaxError:
+                    form.body.errors.append("Body appears to be improper HTML (forget to close a tag?).")
+                    raise ValidationError
+
+                tag_list = set(re.split('\s?,\s?', tag_list))
                 if len(tag_list) == 1 and '' in tag_list:
                     tag_list = set([])
 
                 # slug generation
-                slug_title = generate_slug(form.title.data)
-                if len(slug_title) > 50:
+                slug_title = generate_slug(title)
+                if len(slug_title) > 80:
                     form.title.errors.append("Couldn't generate a slug for title - try a different title.")
                     raise ValidationError
 
                 # add the post
-                new_post = Post(title=form.title.data, 
-                                body=form.body.data, 
+                new_post = Post(title=title, 
+                                body=body, 
                                 slug=slug_title,
                                 authors=[current_user])
                 for tag_name in tag_list:
                     tag = Tag.query.filter_by(name=tag_name).first()
                     if tag is None:
                         slug_tag = generate_slug(tag_name)
-                        if len(slug_tag) > 50:
+                        if len(slug_tag) > 80:
                             form.tag_list.errors.append("Couldn't generate a slug for tag %s - try a different title." % tag_name)
                             raise ValidationError
                         tag = Tag(name=tag_name,

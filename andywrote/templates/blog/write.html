@@ -28,6 +28,11 @@
       {%- endfor -%}
     </ul>
   {%- endif -%}
-  <input type="submit" value="Post" />
+  <div class="write-options">
+    {{ form.convert_breaks(id="convert-breaks", checked=True) }} Convert line breaks to paragraphs
+  </div>
+  <div>
+    <input type="submit" value="Post" />
+  </div>
 </form>
 {% endblock %}
