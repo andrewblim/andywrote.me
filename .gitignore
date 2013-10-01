@@ -1,0 +1,4 @@
+# Remove this in production! There is no production server out there yet
+# so no reason to include these, but once you do have the server going, 
+# you do want to include these in your development environment. 
+alembic/versions/*
