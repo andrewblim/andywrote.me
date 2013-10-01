@@ -12,6 +12,7 @@ from wtforms import StringField, TextAreaField, BooleanField, validators
 from wtforms.validators import ValidationError
 
 import bleach
+from smartypants import smartypants
 from lxml import etree
 import datetime
 import re
@@ -203,6 +204,7 @@ class WriteForm(Form):
     body     = TextAreaField(u'Body')
 
     convert_breaks = BooleanField(u'Convert line breaks to &lt;p&gt;')
+    use_smartypants = BooleanField(u'Use SmartyPants')
 
 # Routes
 
@@ -243,9 +245,12 @@ def blog_submit_post():
                 if form.convert_breaks.data:
                     body = re.sub('\n+', '</p><p>', body)
                     body = "<p>%s</p>" % body
+                if form.use_smartypants.data:
+                    body = smartypants(body)
 
                 try:
-                    etree.fromstring(body)
+                    body_parse = "<article>%s</article>"
+                    etree.fromstring(body_parse)
                 except etree.XMLSyntaxError:
                     form.body.errors.append("Body appears to be improper HTML (forget to close a tag?).")
                     raise ValidationError
@@ -304,6 +309,16 @@ def blog_post(post_slug):
     if post is None:
         abort(404)
     return render_template('blog/post.html', post=post)
+
+@app.route('/blog/posts/<post_slug>/edit')
+@login_required
+def blog_edit_post(post_slug):
+    post = Post.query.filter_by(slug=post_slug) \
+                     .first()
+    if post is None:
+        abort(404)
+    return render_template('blog/write.html', form=WriteForm(),
+                           post=post)
 
 @app.route('/blog/tags/<tag_slug>')
 def blog_posts_by_tag(tag_slug):

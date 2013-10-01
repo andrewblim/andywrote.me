@@ -24,7 +24,7 @@
           <div>{{ post.created_at.strftime('%I:%M %p') }}</div>
         </td>
         <td class="manage-posts-actions">
-          <div>Edit</div>
+          <div><a href="/blog/posts/{{ post.slug }}/edit">Edit</a></div>
           <div>Delete</div>
         </td>
       </tr>

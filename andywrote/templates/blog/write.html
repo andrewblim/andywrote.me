@@ -1,7 +1,13 @@
 {% extends "blog/base.html" %}
 {% block title %}andywrote.me | blog{% endblock %}
 {% block content %}
-<h2>New post</h2>
+<h2>
+  {%- if post is defined -%}
+    Edit post: {{ post.title }}
+  {%- else -%}
+    New post
+  {%- endif -%}
+</h2>
 <form method="POST" action="/blog/write">
   {{ form.hidden_tag() }}
   {{ form.title(id="write-title", placeholder="Title (plaintext)") }}
@@ -29,7 +35,8 @@
     </ul>
   {%- endif -%}
   <div class="write-options">
-    {{ form.convert_breaks(id="convert-breaks", checked=True) }} Convert line breaks to paragraphs
+    {{ form.convert_breaks(id="convert-breaks", checked=True) }} Convert line breaks to paragraphs<br/>
+    {{ form.use_smartypants(id="use-smartypants", checked=True) }} Use <a href="http://daringfireball.net/projects/smartypants/">SmartyPants</a> (curls quotation marks except in tags like &lt;pre&gt;, etc.)
   </div>
   <div>
     <input type="submit" value="Post" />
