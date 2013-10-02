@@ -208,6 +208,10 @@ class WriteForm(Form):
 
 # Routes
 
+@app.errorhandler(404)
+def resource_not_found(error):
+    return render_template('404.html'), 404
+
 @app.route('/')
 def about():
     if current_user.is_anonymous():
@@ -336,6 +340,8 @@ def blog_delete_post(post_slug):
 @app.route('/blog/tags/<tag_slug>')
 def blog_posts_by_tag(tag_slug):
     tag = Tag.query.filter_by(slug=tag_slug).first()
+    if tag is None:
+        abort(404)
     posts = Post.query.filter(Post.tags.any(Tag.id == tag.id)) \
                       .order_by(Post.created_at.desc()) \
                       .all()
