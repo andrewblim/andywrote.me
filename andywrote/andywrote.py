@@ -246,6 +246,7 @@ def blog_submit_post():
                     body = re.sub('\n+', '</p><p>', body)
                     body = "<p>%s</p>" % body
                 if form.use_smartypants.data:
+                    title = smartypants(title)
                     body = smartypants(body)
 
                 try:
@@ -284,7 +285,7 @@ def blog_submit_post():
 
                 db.session.add(new_post)
                 db.session.commit()
-                flash(u'Successfully posted: %s' % form.title.data, category='blog')
+                flash(u'Successfully posted: %s' % title, category='blog')
                 return redirect('/blog')
 
             except ValidationError:

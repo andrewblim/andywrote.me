@@ -13,7 +13,7 @@
   <table id="manage-posts">
     {%- for post in posts -%}
       <tr class="manage-posts-entry-{{ loop.index0 % 2 }}">
-        <td class="manage-posts-title">{{ post.title|safe }}</td>
+        <td class="manage-posts-title"><a href="/blog/posts/{{ post.slug }}">{{ post.title|safe }}</a></td>
         <td class="manage-posts-authors">
           {%- for author in post.authors -%}
             <div>{{ author.name }}</div>

@@ -81,3 +81,5 @@ table#manage-posts {
 .manage-posts-authors   { padding: 0.25em 0.5em; width: 15%; font-size: 80%; }
 .manage-posts-timestamp { padding: 0.25em 0.5em; width: 25%; font-size: 80%; }
 .manage-posts-actions   { padding: 0.25em 0.5em; width: 10%; font-size: 80%; }
+
+.manage-posts-title > a { color: inherit; }

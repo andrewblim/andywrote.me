@@ -3,7 +3,7 @@
 {% block content %}
 <h2>
   {%- if post is defined -%}
-    Edit post: {{ post.title }}
+    Edit post: {{ post.title|safe }}
   {%- else -%}
     New post
   {%- endif -%}
