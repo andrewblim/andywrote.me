@@ -113,6 +113,12 @@ h2 {
   padding: 1em 0.5em;
 }
 
+.feed-icon {
+  height: 15px;
+  width: 15px;
+  border: none;
+}
+
 .account-icon {
   height: 25px;
   width: 25px;

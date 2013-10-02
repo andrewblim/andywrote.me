@@ -11,6 +11,9 @@ from flask_wtf import Form
 from wtforms import StringField, TextAreaField, BooleanField, validators
 from wtforms.validators import ValidationError
 
+from urlparse import urljoin
+from werkzeug.contrib.atom import AtomFeed
+
 import bleach
 from smartypants import smartypants
 from lxml import etree
@@ -112,7 +115,7 @@ class Post(db.Model):
     tags = db.relationship(
         'Tag',
         secondary=posts_tags,
-        backref=db.backref('tags', lazy='dynamic')
+        backref=db.backref('posts', lazy='dynamic')
     )
 
     def __init__(self, title, slug, body, 
@@ -332,6 +335,10 @@ def blog_delete_post(post_slug):
                      .first()
     if post is None:
         abort(404)
+    for tag in post.tags:
+        if len(tag.posts.all()) == 1:
+            db.session.delete(tag)
+            flash(u'Deleted emptied tag: %s' % tag.name)
     db.session.delete(post)
     db.session.commit()
     flash(u'Deleted post: %s' % post.title, category='blog')
@@ -348,6 +355,26 @@ def blog_posts_by_tag(tag_slug):
     return render_template('blog/index.html', 
                             posts=posts, 
                             tag_view=tag.name)
+
+def make_external(url):
+    return urljoin(request.url_root, url)
+
+@app.route('/blog/feed.atom')
+def recent_feed():
+    feed = AtomFeed('andywrote - recent blog posts',
+                    feed_url=request.url,
+                    url=request.url_root)
+    posts = Post.query.order_by(Post.created_at.desc()) \
+                      .limit(20) \
+                      .all()
+    for post in posts:
+        feed.add(post.title, 
+                 unicode(post.body),
+                 content_type='html',
+                 author=', '.join(map(lambda x: x.name, post.authors)),
+                 url=make_external('/blog/posts/%s' % post.slug),
+                 updated=post.updated_at)
+    return feed.get_response()
 
 if __name__ == '__main__':
     app.run()
