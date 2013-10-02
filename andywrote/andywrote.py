@@ -321,6 +321,18 @@ def blog_edit_post(post_slug):
     return render_template('blog/write.html', form=WriteForm(),
                            post=post)
 
+@app.route('/blog/posts/<post_slug>/delete')
+@login_required
+def blog_delete_post(post_slug):
+    post = Post.query.filter_by(slug=post_slug) \
+                     .first()
+    if post is None:
+        abort(404)
+    db.session.delete(post)
+    db.session.commit()
+    flash(u'Deleted post: %s' % post.title, category='blog')
+    return redirect('/blog/manage')
+
 @app.route('/blog/tags/<tag_slug>')
 def blog_posts_by_tag(tag_slug):
     tag = Tag.query.filter_by(slug=tag_slug).first()
