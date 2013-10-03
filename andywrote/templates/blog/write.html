@@ -9,31 +9,56 @@
   {%- endif -%}
 </h2>
 <form method="POST" action="/blog/write">
+
   {{ form.hidden_tag() }}
-  {{ form.title(id="write-title", placeholder="Title (plaintext)") }}
-  {%- if form.title.errors -%}
-    <ul class="submit-error-list">
-      {%- for error in form.title.errors -%}
-        <li class="submit-error">{{ error }}</li>
-      {%- endfor -%}
-    </ul>
-  {%- endif -%}
-  {{ form.tag_list(id="write-tags", placeholder="Tags (comma-separated)") }}
-  {%- if form.tag_list.errors -%}
-    <ul class="submit-error-list">
-      {%- for error in form.tag_list.errors -%}
-        <li class="submit-error">{{ error }}</li>
-      {%- endfor -%}
-    </ul>
-  {%- endif -%}
-  {{ form.body(id="write-body", placeholder="Whatever you have to say (HTML, though it will be sanitized)") }}
-  {%- if form.body.errors -%}
-    <ul class="submit-error-list">
-      {%- for error in form.body.errors -%}
-        <li class="submit-error">{{ error }}</li>
-      {%- endfor -%}
-    </ul>
-  {%- endif -%}
+
+  <div class="write-form-item">
+    {{ form.title(id="write-title", placeholder="Title (plaintext)", maxlength=300) }}
+    {%- if form.title.errors -%}
+      <ul class="submit-error-list">
+        {%- for error in form.title.errors -%}
+          <li class="submit-error">{{ error }}</li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+  </div>
+
+  <div class="write-form-item">
+    <label id="write-slug-label">Permalink: /blog/posts/</label>
+    <div id="write-slug-container">
+      {{ form.slug(id="write-slug", placeholder="(leave blank for reasonable default based on title)", maxlength=80) }}
+      {%- if form.slug.errors -%}
+        <ul class="submit-error-list">
+          {%- for error in form.slug.errors -%}
+            <li class="submit-error">{{ error }}</li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <div class="write-form-item">
+    {{ form.tag_list(id="write-tags", placeholder="Tags (comma-separated)") }}
+    {%- if form.tag_list.errors -%}
+      <ul class="submit-error-list">
+        {%- for error in form.tag_list.errors -%}
+          <li class="submit-error">{{ error }}</li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+  </div>
+
+  <div class="write-form-item">
+    {{ form.body(id="write-body", placeholder="Whatever you have to say (HTML, though it will be sanitized)") }}
+    {%- if form.body.errors -%}
+      <ul class="submit-error-list">
+        {%- for error in form.body.errors -%}
+          <li class="submit-error">{{ error }}</li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+  </div>
+
   <div class="write-options">
     {{ form.convert_breaks(id="convert-breaks", checked=True) }} Convert line breaks to paragraphs<br/>
     {{ form.use_smartypants(id="use-smartypants", checked=True) }} Use <a href="http://daringfireball.net/projects/smartypants/">SmartyPants</a> (curls quotation marks except in tags like &lt;pre&gt;, etc.)

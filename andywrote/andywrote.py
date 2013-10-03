@@ -163,7 +163,7 @@ def create_user(email, name, password):
 
 def generate_slug(text, field_length=80):
     slug_stem = re.sub('\s', '-', text)
-    slug_stem = re.sub('[^A-Za-z\-]', '', slug_stem)
+    slug_stem = re.sub('[^A-Za-z0-9\-]', '', slug_stem)
     slug_stem = slug_stem.lower()[:(field_length-5)]
     slug_number = 1
     slug = slug_stem
@@ -203,6 +203,14 @@ class WriteForm(Form):
             min=1, max=300,
             message=u'Your title must contain at least 1 character and no more than 300 characters.')
         ])
+    slug     = StringField(u'Slug', \
+        [validators.Length(
+            max=80,
+            message=u'Your slug must contain at most 80 characters'),
+         validators.Regexp(
+            regex=r'^[A-Za-z0-9\-]*$',
+            message=u'Your slug may only contain letters, numbers, and hyphens')
+        ])
     tag_list = StringField(u'Tags')
     body     = TextAreaField(u'Body')
 
@@ -225,7 +233,7 @@ def about():
 
 @app.route('/blog/')
 def blog():
-    posts = Post.query.order_by(Post.created_at.desc()).all()
+    posts = Post.query.order_by(Post.created_at.desc(), Post.id.desc()).all()
     return render_template('blog/index.html', posts=posts)
 
 @app.route('/blog/write')
@@ -250,8 +258,8 @@ def blog_submit_post():
             try:
 
                 if form.convert_breaks.data:
-                    body = re.sub('\n+', '</p><p>', body)
-                    body = "<p>%s</p>" % body
+                    body = re.sub('\n+', '\n</p>\n<p>\n', body)
+                    body = "<p>\n%s\n</p>" % body
                 if form.use_smartypants.data:
                     title = smartypants(title)
                     body = smartypants(body)
@@ -268,10 +276,16 @@ def blog_submit_post():
                     tag_list = set([])
 
                 # slug generation
-                slug_title = generate_slug(title)
-                if len(slug_title) > 80:
-                    form.title.errors.append("Couldn't generate a slug for title - try a different title.")
-                    raise ValidationError
+                if form.slug.data == '':
+                    slug_title = generate_slug(title)
+                    if len(slug_title) > 80:
+                        form.title.errors.append("Couldn't generate a slug for title - try a different title.")
+                        raise ValidationError
+                else: 
+                    slug_title = form.slug.data
+                    if Post.query.filter_by(slug=form.slug.data).first() is not None:
+                        form.slug.errors.append("There is already a post with that slug")
+                        raise ValidationError
 
                 # add the post
                 new_post = Post(title=title, 
@@ -306,7 +320,7 @@ def blog_submit_post():
 @app.route('/blog/manage')
 @login_required
 def blog_manage():
-    posts = Post.query.order_by(Post.created_at.desc()) \
+    posts = Post.query.order_by(Post.created_at.desc(), Post.id.desc()) \
                       .all()
     return render_template('blog/manage.html', posts=posts)
 
@@ -325,7 +339,12 @@ def blog_edit_post(post_slug):
                      .first()
     if post is None:
         abort(404)
-    return render_template('blog/write.html', form=WriteForm(),
+    form=WriteForm()
+    form.title.data    = post.title
+    form.slug.data     = post.slug
+    form.tag_list.data = ', '.join(map(lambda x: x.name, post.tags))
+    form.body.data     = post.body
+    return render_template('blog/write.html', form=form,
                            post=post)
 
 @app.route('/blog/posts/<post_slug>/delete')
@@ -350,7 +369,7 @@ def blog_posts_by_tag(tag_slug):
     if tag is None:
         abort(404)
     posts = Post.query.filter(Post.tags.any(Tag.id == tag.id)) \
-                      .order_by(Post.created_at.desc()) \
+                      .order_by(Post.created_at.desc(), Post.id.desc()) \
                       .all()
     return render_template('blog/index.html', 
                             posts=posts, 
@@ -364,7 +383,7 @@ def recent_feed():
     feed = AtomFeed('andywrote - recent blog posts',
                     feed_url=request.url,
                     url=request.url_root)
-    posts = Post.query.order_by(Post.created_at.desc()) \
+    posts = Post.query.order_by(Post.created_at.desc(), Post.id.desc()) \
                       .limit(20) \
                       .all()
     for post in posts:
