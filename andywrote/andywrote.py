@@ -176,11 +176,12 @@ allowed_tags_body = [
     'ul',
 ]
 
-def create_user(email, name, password):
+def create_user(email, name, password, active=True):
     user_datastore.create_user(
         email=email,
         name=name,
-        password=encrypt_password(password)
+        password=encrypt_password(password),
+        active=active
     )
 
 # generate_slug
