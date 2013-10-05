@@ -60,8 +60,18 @@
   </div>
 
   <div class="write-options">
-    {{ form.convert_breaks(id="convert-breaks", checked=True) }} Convert line breaks to paragraphs<br/>
-    {{ form.use_smartypants(id="use-smartypants", checked=True) }} Use <a href="http://daringfireball.net/projects/smartypants/">SmartyPants</a> (curls quotation marks except in tags like &lt;pre&gt;, etc.)
+    {%- if post is defined -%}
+      {{ form.convert_breaks(id="convert-breaks") }} 
+    {%- else -%}
+      {{ form.convert_breaks(id="convert-breaks", checked=True) }} 
+    {%- endif -%}
+    Convert line breaks to paragraphs<br/>
+    {%- if post is defined -%}
+      {{ form.use_smartypants(id="use-smartypants") }} 
+    {%- else -%}
+      {{ form.use_smartypants(id="use-smartypants", checked=True) }} 
+    {%- endif -%}
+    Use <a href="http://daringfireball.net/projects/smartypants/">SmartyPants</a> (curls quotation marks except in tags like &lt;pre&gt;, etc.)
   </div>
   <div>
     <input type="submit" value="Post" />

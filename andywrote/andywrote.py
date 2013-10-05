@@ -154,24 +154,6 @@ security = Security(app, user_datastore)
 
 # Functions/helper definitions
 
-def create_user(email, name, password):
-    user_datastore.create_user(
-        email=email,
-        name=name,
-        password=encrypt_password(password)
-    )
-
-def generate_slug(text, field_length=80):
-    slug_stem = re.sub('\s', '-', text)
-    slug_stem = re.sub('[^A-Za-z0-9\-]', '', slug_stem)
-    slug_stem = slug_stem.lower()[:(field_length-5)]
-    slug_number = 1
-    slug = slug_stem
-    while Post.query.filter_by(slug=slug).first() is not None:
-        slug = "%s-%d" % (slug_stem, slug_number)
-        slug_number += 1
-    return slug
-
 allowed_tags_body = [
     'a', 
     'abbr', 
@@ -194,56 +176,34 @@ allowed_tags_body = [
     'ul',
 ]
 
-# Forms
+def create_user(email, name, password):
+    user_datastore.create_user(
+        email=email,
+        name=name,
+        password=encrypt_password(password)
+    )
 
-class WriteForm(Form):
+# generate_slug
+# Used to generate stubs for URLs, i.e. a post titled "This is my fancy pants
+# post" might have a slug of this-is-my-fancy-pants-post. 
 
-    title    = StringField(u'Title', \
-        [validators.Length(
-            min=1, max=300,
-            message=u'Your title must contain at least 1 character and no more than 300 characters.')
-        ])
-    slug     = StringField(u'Slug', \
-        [validators.Length(
-            max=80,
-            message=u'Your slug must contain at most 80 characters'),
-         validators.Regexp(
-            regex=r'^[A-Za-z0-9\-]*$',
-            message=u'Your slug may only contain letters, numbers, and hyphens')
-        ])
-    tag_list = StringField(u'Tags')
-    body     = TextAreaField(u'Body')
+def generate_slug(text, field_length=80):
+    slug_stem = re.sub('\s', '-', text)
+    slug_stem = re.sub('[^A-Za-z0-9\-]', '', slug_stem)
+    slug_stem = slug_stem.lower()[:(field_length-5)]
+    slug_number = 1
+    slug = slug_stem
+    while Post.query.filter_by(slug=slug).first() is not None:
+        slug = "%s-%d" % (slug_stem, slug_number)
+        slug_number += 1
+    return slug
 
-    convert_breaks = BooleanField(u'Convert line breaks to &lt;p&gt;')
-    use_smartypants = BooleanField(u'Use SmartyPants')
+# blog_submit_post
+# This is used both by /blog/write to generate new posts and by
+# /blog/posts/<post-slug>/edit to edit and save existing posts. 
 
-# Routes
+def blog_submit_post(post=None):
 
-@app.errorhandler(404)
-def resource_not_found(error):
-    return render_template('404.html'), 404
-
-@app.route('/')
-def about():
-    if current_user.is_anonymous():
-        email = None
-    else:
-        email = current_user.email
-    return render_template('about.html', email=email)
-
-@app.route('/blog/')
-def blog():
-    posts = Post.query.order_by(Post.created_at.desc(), Post.id.desc()).all()
-    return render_template('blog/index.html', posts=posts)
-
-@app.route('/blog/write')
-@login_required
-def blog_write():
-    return render_template('blog/write.html', form=WriteForm())
-
-@app.route('/blog/write', methods=["POST"])
-@login_required
-def blog_submit_post():
     form = WriteForm()
     if form.is_submitted():
 
@@ -283,30 +243,37 @@ def blog_submit_post():
                         raise ValidationError
                 else: 
                     slug_title = form.slug.data
-                    if Post.query.filter_by(slug=form.slug.data).first() is not None:
+                    if post is None and \
+                       Post.query.filter_by(slug=form.slug.data).first() is not None:
                         form.slug.errors.append("There is already a post with that slug")
                         raise ValidationError
 
-                # add the post
-                new_post = Post(title=title, 
-                                body=body, 
-                                slug=slug_title,
-                                authors=[current_user])
-                for tag_name in tag_list:
-                    tag = Tag.query.filter_by(name=tag_name).first()
-                    if tag is None:
-                        slug_tag = generate_slug(tag_name)
-                        if len(slug_tag) > 80:
-                            form.tag_list.errors.append("Couldn't generate a slug for tag %s - try a different title." % tag_name)
-                            raise ValidationError
-                        tag = Tag(name=tag_name,
-                                  slug=slug_tag)
-                        db.session.add(tag)
-                    new_post.tags.append(tag)
+                # still need to handle tag edits correctly
 
-                db.session.add(new_post)
+                # add the post
+                if post is None:
+                    new_post = Post(title=title, 
+                                    body=body, 
+                                    slug=slug_title,
+                                    authors=[current_user])
+                    for tag_name in tag_list:
+                        tag = Tag.query.filter_by(name=tag_name).first()
+                        if tag is None:
+                            slug_tag = generate_slug(tag_name)
+                            if len(slug_tag) > 80:
+                                form.tag_list.errors.append("Couldn't generate a slug for tag %s - try a different title." % tag_name)
+                                raise ValidationError
+                            tag = Tag(name=tag_name,
+                                      slug=slug_tag)
+                            db.session.add(tag)
+                        new_post.tags.append(tag)
+                    db.session.add(new_post)
+
                 db.session.commit()
-                flash(u'Successfully posted: %s' % title, category='blog')
+                if post is None:
+                    flash(u'Successfully posted: %s' % title, category='blog')
+                else:
+                    flash(u'Successfully edited: %s' % title, category='blog')
                 return redirect('/blog')
 
             except ValidationError:
@@ -315,7 +282,61 @@ def blog_submit_post():
             pass
 
     flash(u'There were errors in your submission. Please check below.')
+
+    # still need to handle this redirect properly
     return render_template('blog/write.html', form=form)
+
+# Forms
+
+class WriteForm(Form):
+
+    title = StringField(u'Title', \
+        [validators.Length(
+            min=1, max=300,
+            message=u'Your title must contain at least 1 character and no more than 300 characters.')
+        ])
+    slug = StringField(u'Slug', \
+        [validators.Length(
+            max=80,
+            message=u'Your slug must contain at most 80 characters'),
+         validators.Regexp(
+            regex=r'^[A-Za-z0-9\-]*$',
+            message=u'Your slug may only contain letters, numbers, and hyphens')
+        ])
+    tag_list = StringField(u'Tags')
+    body     = TextAreaField(u'Body')
+
+    convert_breaks = BooleanField(u'Convert line breaks to &lt;p&gt;')
+    use_smartypants = BooleanField(u'Use SmartyPants')
+
+# Routes
+
+@app.errorhandler(404)
+def resource_not_found(error):
+    return render_template('404.html'), 404
+
+@app.route('/')
+def about():
+    if current_user.is_anonymous():
+        email = None
+    else:
+        email = current_user.email
+    return render_template('about.html', email=email)
+
+@app.route('/blog/')
+def blog():
+    posts = Post.query.order_by(Post.created_at.desc(), Post.id.desc()).all()
+    return render_template('blog/index.html', posts=posts)
+
+@app.route('/blog/write')
+@login_required
+def blog_write():
+    return render_template('blog/write.html', form=WriteForm())
+
+@app.route('/blog/write', methods=["POST"])
+@login_required
+def blog_submit_new_post():
+    return blog_submit_post()
 
 @app.route('/blog/manage')
 @login_required
@@ -346,6 +367,15 @@ def blog_edit_post(post_slug):
     form.body.data     = post.body
     return render_template('blog/write.html', form=form,
                            post=post)
+
+@app.route('/blog/posts/<post_slug>/edit', methods=["POST"])
+@login_required
+def blog_submit_edited_post():
+    post = Post.query.filter_by(slug=post_slug) \
+                     .first()
+    if post is None:
+        abort(404)
+    return blog_submit_post(post=post)
 
 @app.route('/blog/posts/<post_slug>/delete')
 @login_required
