@@ -209,6 +209,7 @@ def delete_user_by_display_name(display_name):
 
 def generate_slug(text, field_length=80):
     slug_stem = re.sub('\s', '-', text)
+    slug_stem = re.sub('&[^;]*;', '-', slug_stem) # remove HTML escaped entities
     slug_stem = re.sub('[^A-Za-z0-9\-]', '', slug_stem)
     slug_stem = slug_stem.lower()[:(field_length-5)]
     slug_number = 1
