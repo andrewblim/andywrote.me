@@ -22,10 +22,10 @@ input[type=text]:focus, textarea:focus {
 
 .tag-view-tag { font-style: normal; }
 
-.write-form-item { margin-bottom: 1em; display: block; width: 100%; }
+.write-form-item { margin-bottom: 1em; display: block; width: 99%; }
 
 #write-title {
-  width: 100%;
+  width: 99%;
   font-size: 14pt;
   outline: none;
 }
@@ -47,13 +47,13 @@ input[type=text]:focus, textarea:focus {
 }
 
 #write-tags {
-  width: 100%;
+  width: 99%;
   font-size: 9pt;
   outline: none;
 }
 
 #write-body {
-  width: 100%;
+  width: 99%;
   height: 20em;
   font-size: 10pt;
   resize: none;
@@ -81,7 +81,7 @@ h2.post-title a { color: inherit; }
 }
 
 table#manage-posts { 
-  width: 100%; 
+  width: 99%; 
   text-align: left; 
   border-collapse: collapse;
 }

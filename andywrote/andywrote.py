@@ -19,6 +19,7 @@ from smartypants import smartypants
 from lxml import etree
 import datetime
 import re
+import sqlalchemy
 
 DEBUG      = True
 USERNAME   = 'andywrote'
@@ -78,6 +79,7 @@ class User(db.Model, UserMixin):
 
     id           = db.Column(db.Integer, primary_key=True)
     name         = db.Column(db.String(80))
+    display_name = db.Column(db.String(80), unique=True)
     email        = db.Column(db.String(200), unique=True)
     password     = db.Column(db.String(200))
     active       = db.Column(db.Boolean)
@@ -176,13 +178,30 @@ allowed_tags_body = [
     'ul',
 ]
 
-def create_user(email, name, password, active=True):
-    user_datastore.create_user(
-        email=email,
-        name=name,
-        password=encrypt_password(password),
-        active=active
-    )
+def create_user(**kwargs):
+    if not ('email' in kwargs and 'name' in kwargs and 'password' in kwargs):
+        raise Exception('create_user must receive an email, name, and password')
+    if 'display_name' not in kwargs:
+        kwargs['display_name'] = kwargs['name']
+    kwargs['password'] = encrypt_password(kwargs['password'])
+    user_datastore.create_user(**kwargs)
+    db.session.commit()
+
+def delete_user_by_email(email):
+    user = User.query.filter_by(email=email).first()
+    if user is not None:
+        user_datastore.delete_user(user)
+        db.session.commit()
+    else:
+        raise sqlalchemy.orm.exc.NoResultFound('No user found with email %s' % email)
+
+def delete_user_by_display_name(display_name):
+    user = User.query.filter_by(display_name=display_name).first()
+    if user is not None:
+        user_datastore.delete_user(user)
+        db.session.commit()
+    else:
+        raise sqlalchemy.orm.exc.NoResultFound('No user found with display name %s' % display_name)
 
 # generate_slug
 # Used to generate stubs for URLs, i.e. a post titled "This is my fancy pants

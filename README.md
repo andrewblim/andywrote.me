@@ -32,10 +32,8 @@ Registration is disabled (this was intended as a single-user website). You can c
 
 ```
 import andywrote
-with andywrote.app.app_context():
-    andywrote.create_user(email='your_email', name='your_name', 
-                          password='your_password')
-    andywrote.db.session.commit()
+with andywrote.app.app_context():  # must be in application context
+    andywrote.create_user(email='your_email', name='your_name', password='your_password')
 ```
 
 The app uses sha512_crypt to store passwords. 
