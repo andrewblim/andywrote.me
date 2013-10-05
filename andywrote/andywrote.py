@@ -238,6 +238,9 @@ def blog_submit_post(post=None):
         if form.validate():
             try:
 
+                # Convert line breaks/apply smartypants as needed, then verify 
+                # that body is well-formed
+
                 if form.convert_breaks.data:
                     body = re.sub('\n+', '\n</p>\n<p>\n', body)
                     body = "<p>\n%s\n</p>" % body
@@ -252,26 +255,31 @@ def blog_submit_post(post=None):
                     form.body.errors.append("Body appears to be improper HTML (forget to close a tag?).")
                     raise ValidationError
 
+                # Get list of tag names
+
                 tag_list = set(re.split('\s?,\s?', tag_list))
                 if len(tag_list) == 1 and '' in tag_list:
                     tag_list = set([])
 
-                # slug generation
+                # Generate slug for post if it's not specified. It's a ValidationError to
+                # have a duplicate slug, though generate_slug will try to append "-n" 
+                # to make a working slug. 
+
                 if form.slug.data == '':
                     slug_title = generate_slug(title)
                     if len(slug_title) > 80:
-                        form.title.errors.append("Couldn't generate a slug for title - try a different title.")
+                        form.title.errors.append("Couldn't generate a slug from title - try a different title.")
                         raise ValidationError
                 else: 
                     slug_title = form.slug.data
-                    if post is None and \
-                       Post.query.filter_by(slug=form.slug.data).first() is not None:
+                    if post is None and Post.query.filter_by(slug=form.slug.data).first() is not None:
                         form.slug.errors.append("There is already a post with that slug")
                         raise ValidationError
 
                 # still need to handle tag edits correctly
 
-                # add the post
+                # Add the post, if it's a new one. 
+
                 if post is None:
                     new_post = Post(title=title, 
                                     body=body, 
@@ -290,6 +298,15 @@ def blog_submit_post(post=None):
                         new_post.tags.append(tag)
                     db.session.add(new_post)
 
+                # If it's not new, edit post
+
+                else:
+                    post.title    = title
+                    post.body     = body
+                    post.slug     = slug_title
+                    post.authors  = [current_user]
+                    # still need to handle tags
+
                 db.session.commit()
                 if post is None:
                     flash(u'Successfully posted: %s' % title, category='blog')
@@ -303,8 +320,6 @@ def blog_submit_post(post=None):
             pass
 
     flash(u'There were errors in your submission. Please check below.')
-
-    # still need to handle this redirect properly
     return render_template('blog/write.html', form=form)
 
 # Forms
@@ -391,12 +406,14 @@ def blog_edit_post(post_slug):
 
 @app.route('/blog/posts/<post_slug>/edit', methods=["POST"])
 @login_required
-def blog_submit_edited_post():
+def blog_submit_edited_post(post_slug):
     post = Post.query.filter_by(slug=post_slug) \
                      .first()
     if post is None:
         abort(404)
     return blog_submit_post(post=post)
+
+# make this more RESTful...
 
 @app.route('/blog/posts/<post_slug>/delete')
 @login_required

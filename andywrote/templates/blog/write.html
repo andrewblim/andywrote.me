@@ -8,7 +8,13 @@
     New post
   {%- endif -%}
 </h2>
-<form method="POST" action="/blog/write">
+<form method="POST" action="
+  {%- if post is defined -%}
+    {{ "/blog/posts/%s/edit" % post.slug }}
+  {%- else -%}
+    {{ "/blog/write" }}
+  {%- endif -%}
+">
 
   {{ form.hidden_tag() }}
 
