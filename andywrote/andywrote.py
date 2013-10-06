@@ -219,6 +219,21 @@ def generate_slug(text, field_length=80):
         slug_number += 1
     return slug
 
+# find_or_create_tag_by_name
+# Useful in creating/editing posts. Does not commit it to the db session, you
+# should do that separately. 
+
+def find_or_create_tag_by_name(tag_name):
+    tag = Tag.query.filter_by(name=tag_name).first()
+    if tag is None:
+        slug_tag = generate_slug(tag_name)
+        if len(slug_tag) > 80:
+            form.tag_list.errors.append("Couldn't generate a slug for tag %s - try a different title." % tag_name)
+            raise ValidationError
+        tag = Tag(name=tag_name, slug=slug_tag)
+        db.session.add(tag)
+    return tag
+
 # blog_submit_post
 # This is used both by /blog/write to generate new posts and by
 # /blog/posts/<post-slug>/edit to edit and save existing posts. 
@@ -276,8 +291,6 @@ def blog_submit_post(post=None):
                         form.slug.errors.append("There is already a post with that slug")
                         raise ValidationError
 
-                # still need to handle tag edits correctly
-
                 # Add the post, if it's a new one. 
 
                 if post is None:
@@ -286,15 +299,7 @@ def blog_submit_post(post=None):
                                     slug=slug_title,
                                     authors=[current_user])
                     for tag_name in tag_list:
-                        tag = Tag.query.filter_by(name=tag_name).first()
-                        if tag is None:
-                            slug_tag = generate_slug(tag_name)
-                            if len(slug_tag) > 80:
-                                form.tag_list.errors.append("Couldn't generate a slug for tag %s - try a different title." % tag_name)
-                                raise ValidationError
-                            tag = Tag(name=tag_name,
-                                      slug=slug_tag)
-                            db.session.add(tag)
+                        tag = find_or_create_tag_by_name(tag_name)
                         new_post.tags.append(tag)
                     db.session.add(new_post)
 
@@ -305,7 +310,15 @@ def blog_submit_post(post=None):
                     post.body     = body
                     post.slug     = slug_title
                     post.authors  = [current_user]
-                    # still need to handle tags
+                    tags_removed = filter(lambda x: x.name not in tag_list, post.tags)
+                    post.tags     = []
+                    for tag_name in tag_list:
+                        tag = find_or_create_tag_by_name(tag_name)
+                        post.tags.append(tag)
+                    # remove tags that are now not used by any posts
+                    for tag in tags_removed:
+                        if len(tag.posts.all()) == 1:
+                            db.session.delete(tag)
 
                 db.session.commit()
                 if post is None:
@@ -422,6 +435,7 @@ def blog_delete_post(post_slug):
                      .first()
     if post is None:
         abort(404)
+    # remove tags that are not used by any other posts
     for tag in post.tags:
         if len(tag.posts.all()) == 1:
             db.session.delete(tag)
