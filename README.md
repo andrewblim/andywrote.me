@@ -6,7 +6,7 @@ Postgres-related instructions assume you're using OS X and Postgres.app, which i
 
 - Install Python (any reasonably up-to-date version of Python 2, haven't tested anything with Python 3). Install pip. 
 
-- Install the packages in `pip.manifest` with `pip install -r pip.manifest`. 
+- Install the packages in `requirements.txt` with `pip install -r requirements.txt`. 
 
 - Install Postgres.app and launch it. 
 
