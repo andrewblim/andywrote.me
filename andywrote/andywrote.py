@@ -167,7 +167,12 @@ allowed_tags_body = [
     'cite',
     'code', 
     'del',
+    'div',
     'em', 
+    'h3', 
+    'h4', 
+    'h5', 
+    'h6', 
     'i', 
     'li', 
     'ol',
@@ -207,10 +212,18 @@ def delete_user_by_display_name(display_name):
 # Used to generate stubs for URLs, i.e. a post titled "This is my fancy pants
 # post" might have a slug of this-is-my-fancy-pants-post. 
 
-def generate_slug(text, field_length=80):
-    slug_stem = re.sub('\s', '-', text)
-    slug_stem = re.sub('&[^;]*;', '-', slug_stem) # remove HTML escaped entities
-    slug_stem = re.sub('[^A-Za-z0-9\-]', '', slug_stem)
+def generate_slug(text):
+    text = re.sub('\s', '-', text)
+    text = re.sub('&[^;]*;', '-', text) # remove HTML escaped entities
+    text = re.sub('[^A-Za-z0-9\-]', '', text)
+    return text
+
+# generate_slug_for_post
+# Tries to attach a stem "-1, "-2" etc. if there is already a Post with said
+# slug. 
+
+def generate_slug_for_post(text, field_length=80):
+    slug_stem = generate_slug(text)
     slug_stem = slug_stem.lower()[:(field_length-5)]
     slug_number = 1
     slug = slug_stem
@@ -223,13 +236,13 @@ def generate_slug(text, field_length=80):
 # Useful in creating/editing posts. Does not commit it to the db session, you
 # should do that separately. 
 
-def find_or_create_tag_by_name(tag_name):
-    tag = Tag.query.filter_by(name=tag_name).first()
+def find_or_create_tag_by_name(tag_name, field_length=80):
+    slug_tag = generate_slug(tag_name)
+    if len(slug_tag) > field_length:
+        form.tag_list.errors.append("Couldn't generate a slug for tag %s - try a different title." % tag_name)
+        raise ValidationError
+    tag = Tag.query.filter_by(slug=slug_tag).first()
     if tag is None:
-        slug_tag = generate_slug(tag_name)
-        if len(slug_tag) > 80:
-            form.tag_list.errors.append("Couldn't generate a slug for tag %s - try a different title." % tag_name)
-            raise ValidationError
         tag = Tag(name=tag_name, slug=slug_tag)
         db.session.add(tag)
     return tag
@@ -257,8 +270,10 @@ def blog_submit_post(post=None):
                 # that body is well-formed
 
                 if form.convert_breaks.data:
-                    body = re.sub('\n+', '\n</p>\n<p>\n', body)
+                    body = re.sub('\n\n+', '\n</p>\n<p>\n', body)
                     body = "<p>\n%s\n</p>" % body
+                    body = re.sub(r'<p><h([1-6])>', r'<h\1>', body)
+                    body = re.sub(r'</\s*h([1-6])><\/p>', r'</h\1>', body)
                 if form.use_smartypants.data:
                     title = smartypants(title)
                     body = smartypants(body)
@@ -277,11 +292,11 @@ def blog_submit_post(post=None):
                     tag_list = set([])
 
                 # Generate slug for post if it's not specified. It's a ValidationError to
-                # have a duplicate slug, though generate_slug will try to append "-n" 
-                # to make a working slug. 
+                # have a duplicate slug, though generate_slug_for_post will try to get
+                # around that. 
 
                 if form.slug.data == '':
-                    slug_title = generate_slug(title)
+                    slug_title = generate_slug_for_post(title)
                     if len(slug_title) > 80:
                         form.title.errors.append("Couldn't generate a slug from title - try a different title.")
                         raise ValidationError

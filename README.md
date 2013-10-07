@@ -4,13 +4,13 @@
 
 Postgres-related instructions assume you're using OS X and Postgres.app, which is how I did it and which I thought was quite painless, although if you're more comfortable with other Postgres distributions they should be fine. 
 
-1. Install Python (any reasonably up-to-date version of Python 2, haven't tested anything with Python 3). Install pip. 
+- Install Python (any reasonably up-to-date version of Python 2, haven't tested anything with Python 3). Install pip. 
 
-2. Install the packages in `pip.manifest` with `pip install -r pip.manifest`. 
+- Install the packages in `pip.manifest` with `pip install -r pip.manifest`. 
 
-3. Install Postgres.app and launch it. 
+- Install Postgres.app and launch it. 
 
-4. Create a new Postgres user `andywrote` and a new database `andywrote` as follows (thanks to this [handy no-frills guide](http://killtheyak.com/use-postgresql-with-django-flask/): 
+- Create a new Postgres user `andywrote` and a new database `andywrote` as follows (thanks to this [handy no-frills guide](http://killtheyak.com/use-postgresql-with-django-flask/): 
 
 ```
 $ createuser -U andywrote <yourusername>
@@ -21,9 +21,9 @@ $ createdb -U <yourusername> -E utf8 -O <yourusername> andywrote -T template0
 
 ```
 
-5. Run your db migration with Alembic: `alembic upgrade head`
+- Run your db migration with Alembic: `alembic upgrade head`
 
-6. Run `python serve.py`. 
+- Run `python serve.py`. 
 
 
 ## Miscellany

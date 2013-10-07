@@ -109,6 +109,30 @@ h2 {
   text-align: left;
 }
 
+h3 { 
+  font-family: "rokkittregular";
+  font-size: 16pt;
+  text-align: left;
+}
+
+h4 { 
+  font-family: "rokkittregular";
+  font-size: 14pt;
+  text-align: left;
+}
+
+h5 { 
+  font-family: "rokkittregular";
+  font-size: 12pt;
+  text-align: left;
+}
+
+h6 { 
+  font-family: "rokkittregular";
+  font-size: 10pt;
+  text-align: left;
+}
+
 #networks { 
   padding: 1em 0.5em;
 }

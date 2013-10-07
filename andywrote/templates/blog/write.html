@@ -71,7 +71,7 @@
     {%- else -%}
       {{ form.convert_breaks(id="convert-breaks", checked=True) }} 
     {%- endif -%}
-    Convert line breaks to paragraphs<br/>
+    Convert double line breaks to paragraphs<br/>
     {%- if post is defined -%}
       {{ form.use_smartypants(id="use-smartypants") }} 
     {%- else -%}
