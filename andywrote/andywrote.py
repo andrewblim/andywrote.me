@@ -1,4 +1,7 @@
 
+from config import ProductionConfig, DevelopmentConfig
+import os
+
 from flask import Flask, request, session, g, redirect, url_for, \
     abort, render_template, flash
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -21,32 +24,15 @@ import datetime
 import re
 import sqlalchemy
 
-DEBUG      = True
-USERNAME   = 'andywrote'
-SECRET_KEY = 'development_key'
-
-SQLALCHEMY_DATABASE_URI = "postgresql://andywrote@localhost/andywrote"
-
-## Flask-Security config
-
-SECURITY_LOGIN_USER_TEMPLATE = "security/login_user.html"
-
-SECURITY_TRACKABLE     = True
-SECURITY_PASSWORD_HASH = 'sha512_crypt'
-SECURITY_PASSWORD_SALT = 'developmentsalt'
-
-# all these flags are set to False, their defaults in Flask-Security, 
-# but might be useful if you ever want to make this a multi-user site
-
-SECURITY_CONFIRMABLE  = False
-SECURITY_REGISTERABLE = False
-SECURITY_RECOVERABLE  = False
-SECURITY_CHANGEABLE   = False
-
 # Set up app
 
 app = Flask(__name__)
-app.config.from_object(__name__)
+if os.getenv('HEROKU_ENVIRONMENT', None) == 'production':
+    app.config.from_object(ProductionConfig)
+elif os.getenv('HEROKU_ENVIRONMENT', None) == 'development':
+    app.config.from_object(DevelopmentConfig)
+else:
+    raise Exception('Unrecognized or unset HEROKU_ENVIRONMENT variable')
 db = SQLAlchemy(app)
 
 # Schema/models
