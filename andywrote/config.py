@@ -27,7 +27,7 @@ class ProductionConfig(Config):
 
     DEBUG = False # just to be explicit
 
-    SQLALCHEMY_DATABASE_URI = os.getenv('FLASK_SQLALCHEMY_DATABASE_URI')
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     USERNAME                = os.getenv('FLASK_USERNAME')
     SECRET_KEY              = os.getenv('FLASK_SECRET_KEY')
     SECURITY_PASSWORD_SALT  = os.getenv('FLASK_SECURITY_PASSWORD_SALT')

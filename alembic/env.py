@@ -20,6 +20,16 @@ sys.path.append(os.getcwd())
 from andywrote import db
 target_metadata = db.metadata
 
+if os.getenv('HEROKU_ENVIRONMENT', None) == 'production':
+    database_url = os.getenv('DATABASE_URL')
+    if database_url is None:
+        raise Exception('Unset DATABASE_URL variable')
+    app.config.set_main_option('sqlalchemy.url', database_url)
+elif os.getenv('HEROKU_ENVIRONMENT', None) == 'development':
+    pass
+else:
+    raise Exception('Unrecognized or unset HEROKU_ENVIRONMENT variable')
+
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
