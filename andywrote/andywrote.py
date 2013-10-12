@@ -27,9 +27,10 @@ import sqlalchemy
 # Set up app
 
 app = Flask(__name__)
-if os.getenv('HEROKU_ENVIRONMENT', None) == 'production':
+heroku_environment = os.getenv('HEROKU_ENVIRONMENT', None)
+if heroku_environment == 'production':
     app.config.from_object(ProductionConfig)
-elif os.getenv('HEROKU_ENVIRONMENT', None) == 'development':
+elif heroku_environment == 'development':
     app.config.from_object(DevelopmentConfig)
 else:
     raise Exception('Unrecognized or unset HEROKU_ENVIRONMENT variable')

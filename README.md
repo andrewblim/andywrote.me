@@ -1,14 +1,16 @@
 # andywrote.me
 
-## Getting started
+## About
 
-Postgres-related instructions assume you're using OS X and Postgres.app, which is how I did it and which I thought was quite painless, although if you're more comfortable with other Postgres distributions they should be fine. 
+This is the code for my personal website. It is based on Flask and Postgres and is intended to be deployed through Heroku. I have not been wholly disciplined about writing the code in a generic, reusable manner, but it shouldn't be too bad for you to take this code and run your own site should you be interested. 
 
-- Install Python (any reasonably up-to-date version of Python 2, haven't tested anything with Python 3). Install pip. 
+## Get up and running (locally)
 
-- Install the packages in `requirements.txt` with `pip install -r requirements.txt`. 
+- Install Python (any reasonably up-to-date version of Python 2; I haven't tested anything with Python 3). Install pip. 
 
-- Install Postgres.app and launch it. 
+- Install the packages in `requirements.txt` with `pip install -r requirements.txt`. I strongly suggest you create a virtualenv and do it there! 
+
+- Install Postgres. If you are using OS X, I recommend Postgres.app, which is painless to install and easy to use. 
 
 - Create a new Postgres user `andywrote` and a new database `andywrote` as follows (thanks to this [handy no-frills guide](http://killtheyak.com/use-postgresql-with-django-flask/): 
 
@@ -18,13 +20,27 @@ Shall the new role be a superuser? (y/n) n
 Shall the new role be allowed to create databases? (y/n) y
 Shall the new role be allowed to create more new roles? (y/n) n
 $ createdb -U <yourusername> -E utf8 -O <yourusername> andywrote -T template0
-
 ```
 
-- Run your db migration with Alembic: `alembic upgrade head`
+- Run a db migration with Alembic: `alembic upgrade head`
 
-- Run `python serve.py`. 
+- At this point you should be able to run `HEROKU_ENVIRONMENT=development python serve.py` to get your server up and running locally with Flask's local server, without touching Heroku. 
 
+- Get a Heroku account, create your Heroku app, install the Heroku Toolbelt, login ([detailed instructions](https://devcenter.heroku.com/articles/quickstart)). 
+
+- Run `foreman start` to start the webserver. 
+
+## Deploying to Heroku
+
+Thanks to [this Stack Overflow question](http://stackoverflow.com/questions/13262195/how-should-i-run-alembic-migrations-on-heroku) for help on this. Also, check out [Heroku's docs on using Postgres](https://devcenter.heroku.com/articles/heroku-postgresql) for a more detailed explanation on using Postgres with your Heroku app. 
+
+- Add a Postgres database to your app. As of this writing, Heroku's "Dev"-tier database is free and can be installed with `heroku addons:add heroku-postgresql:dev`, or by navigating the Heroku dashboard on its website. 
+
+- You should now have an environment variable in Heroku of the form `HEROKU_POSTGRESQL_<color>_URL` or something like that. Run `heroku pg:promote HEROKU_POSTGRESQL_<color>_URL` to make this database your primary one. 
+
+- Deploy your app the usual way, `git push heroku master`. 
+
+- Migrate your db with `heroku run alembic upgrade head`. 
 
 ## Miscellany
 
