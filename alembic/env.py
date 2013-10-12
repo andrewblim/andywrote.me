@@ -24,7 +24,7 @@ if os.getenv('HEROKU_ENVIRONMENT', None) == 'production':
     database_url = os.getenv('DATABASE_URL')
     if database_url is None:
         raise Exception('Unset DATABASE_URL variable')
-    app.config.set_main_option('sqlalchemy.url', database_url)
+    config.set_main_option('sqlalchemy.url', database_url)
 elif os.getenv('HEROKU_ENVIRONMENT', None) == 'development':
     pass
 else:
