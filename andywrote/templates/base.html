@@ -62,7 +62,19 @@
       <div id="footer-credits">
         <a href="http://www.fontsquirrel.com/fonts/list/foundry/vernon-adams">Rokkitt</a> font by Vernon Adams. <a href="http://www.google.com/fonts/specimen/Libre+Baskerville">Libre Baskerville</a> font by <a href="http://www.impallari.com/">Impallari Type</a>, offered via Google Fonts. <a href="http://sawb.deviantart.com/art/Social-Icons-Pack-123247215">Social network icons</a> by Sylwia Besz-Miazga. Background created with Doug Zongker's <a href="http://isotropic.org/celticknot/">Celtic Knot Thingy</a>. Source for this site available on <a href="https://github.com/andrewblim/andywrote.me">Github</a>. 
       </div>
-      {% if not current_user.is_anonymous() %}
+
+      {%- if config['DEBUG'] -%}
+      <div class="non-production-warning">
+        In DEBUG mode
+      </div>
+      {%- endif -%}
+      {%- if config['TESTING'] -%}
+      <div class="non-production-warning">
+        In TESTING mode
+      </div>
+      {%- endif -%}
+
+      {%- if not current_user.is_anonymous() -%}
       <div id="footer-login-info">
         <p>{{ current_user.email }}</p>
         <ul id="footer-login-action-list">
@@ -71,7 +83,8 @@
           <li class="footer-login-action"><a href="/logout">Log me out</a></li>
         </ul>
       </div>
-      {% endif %}
+      {%- endif -%}
+
     </div>
   </div>
 

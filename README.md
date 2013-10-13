@@ -4,7 +4,7 @@
 
 This is the code for my personal website. It is based on Flask and Postgres and is intended to be deployed through Heroku. I have not been wholly disciplined about writing the code in a generic, reusable manner, but it shouldn't be too bad for you to take this code and run your own site should you be interested. 
 
-## Get up and running (locally)
+## Get up and running locally
 
 - Install Python (any reasonably up-to-date version of Python 2; I haven't tested anything with Python 3). Install pip. 
 
@@ -30,7 +30,7 @@ $ createdb -U <yourusername> -E utf8 -O <yourusername> andywrote -T template0
 
 - Run `foreman start` to start the webserver. 
 
-## Deploying to Heroku
+## Deploy to Heroku
 
 Thanks to [this Stack Overflow question](http://stackoverflow.com/questions/13262195/how-should-i-run-alembic-migrations-on-heroku) for help on this. Also, check out [Heroku's docs on using Postgres](https://devcenter.heroku.com/articles/heroku-postgresql) for a more detailed explanation on using Postgres with your Heroku app. 
 
@@ -38,11 +38,13 @@ Thanks to [this Stack Overflow question](http://stackoverflow.com/questions/1326
 
 - You should now have an environment variable in Heroku of the form `HEROKU_POSTGRESQL_<color>_URL` or something like that. Run `heroku pg:promote HEROKU_POSTGRESQL_<color>_URL` to make this database your primary one. 
 
+- Set Heroku environment variables `FLASK_SECRET_KEY`, `FLASK_SECURITY_PASSWORD_SALT`, and `FLASK_USERNAME` (self-explanatory; they correspond to Flask config variables without `FLASK_`prepended). Use `heroku config:set` to set these. 
+
 - Deploy your app the usual way, `git push heroku master`. 
 
 - Migrate your db with `heroku run alembic upgrade head`. 
 
-## Miscellany
+## User accounts
 
 Registration is disabled (this was intended as a single-user website). You can create a user from a Python prompt as follows: 
 
