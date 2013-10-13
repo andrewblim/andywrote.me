@@ -46,15 +46,11 @@ Thanks to [this Stack Overflow question](http://stackoverflow.com/questions/1326
 
 ## User accounts
 
-Registration is disabled (this was intended as a single-user website). You can create a user from a Python prompt as follows: 
+You can create a new user locally with `HEROKU_ENVIRONMENT=development python create_user.py`. It will prompt you for inputs. You can do the same on Heroku with `heroku run python create_user.py`. To login to the site, go to /login. 
 
-```
-import andywrote
-with andywrote.app.app_context():  # must be in application context
-    andywrote.create_user(email='your_email', name='your_name', password='your_password')
-```
+This website was generally intended as single-user, and so while multiple user accounts is supported, the code is not written with multiple users in mind. There is no obvious link to the login page, there is no way to register a new user through the app, no author pages on the blog, and every user can manage and edit every other user's blog posts. 
 
-The app uses sha512_crypt to store passwords. 
+The app uses sha512_crypt to store passwords. Make sure that in production you have set `FLASK_SECRET_KEY` and `FLASK_SECURITY_PASSWORD_SALT` to something secure. 
 
 ## Credits
 

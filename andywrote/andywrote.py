@@ -23,6 +23,7 @@ from lxml import etree
 import datetime
 import re
 import sqlalchemy
+from getpass import getpass
 
 # Set up app
 
@@ -171,10 +172,16 @@ allowed_tags_body = [
 ]
 
 def create_user(**kwargs):
-    if not ('email' in kwargs and 'name' in kwargs and 'password' in kwargs):
-        raise Exception('create_user must receive an email, name, and password')
+    if 'email' not in kwargs:
+        kwargs['email'] = raw_input('Email address: ')
+    if 'name' not in kwargs:
+        kwargs['name'] = raw_input('Name: ')
     if 'display_name' not in kwargs:
-        kwargs['display_name'] = kwargs['name']
+        kwargs['display_name'] = raw_input('Name to display (blank for the same as above): ')
+        if kwargs['display_name'] == '':
+            kwargs['display_name'] = kwargs['name']
+    if 'password' not in kwargs:
+        kwargs['password'] = getpass('Password: ')
     kwargs['password'] = encrypt_password(kwargs['password'])
     user_datastore.create_user(**kwargs)
     db.session.commit()
