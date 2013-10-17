@@ -25,19 +25,34 @@ class Config(object):
 
 class ProductionConfig(Config):
 
-    DEBUG = False # just to be explicit
+    DEBUG = False
+    TESTING = False
 
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+    # DATABASE_URL not DATABASE_URI is how Heroku environments do it by default
+    DATABASE_URI            = os.getenv('DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = DATABASE_URI
     USERNAME                = os.getenv('FLASK_USERNAME')
     SECRET_KEY              = os.getenv('FLASK_SECRET_KEY')
     SECURITY_PASSWORD_SALT  = os.getenv('FLASK_SECURITY_PASSWORD_SALT')
 
+class TestingConfig(Config):
+    
+    DEBUG = False
+    TESTING = True
+
+    DATABASE_URI            = "postgresql://andywrote@localhost/andywrote-testing"
+    SQLALCHEMY_DATABASE_URI = DATABASE_URI
+    USERNAME                = 'andywrote'
+    SECRET_KEY              = 'testing_key'
+    SECURITY_PASSWORD_SALT  = 'testing_salt'
 
 class DevelopmentConfig(Config):
     
     DEBUG = True
+    TESTING = False
 
-    SQLALCHEMY_DATABASE_URI = "postgresql://andywrote@localhost/andywrote"
+    DATABASE_URI            = "postgresql://andywrote@localhost/andywrote-development"
+    SQLALCHEMY_DATABASE_URI = DATABASE_URI
     USERNAME                = 'andywrote'
     SECRET_KEY              = 'development_key'
-    SECURITY_PASSWORD_SALT  = 'developmentsalt'
+    SECURITY_PASSWORD_SALT  = 'development_salt'

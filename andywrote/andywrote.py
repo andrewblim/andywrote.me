@@ -1,141 +1,25 @@
 
-from config import ProductionConfig, DevelopmentConfig
-import os
-
-from flask import Flask, request, session, g, redirect, url_for, \
+from flask import request, session, g, redirect, url_for, \
     abort, render_template, flash
-from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.security import Security, SQLAlchemyUserDatastore, \
-    UserMixin, RoleMixin, login_required
+from flask.ext.security import Security, SQLAlchemyUserDatastore, login_required
 from flask.ext.login import current_user
 from flask.ext.security.utils import encrypt_password
 
-from flask_wtf import Form
-from wtforms import StringField, TextAreaField, BooleanField, validators
 from wtforms.validators import ValidationError
-
 from urlparse import urljoin
 from werkzeug.contrib.atom import AtomFeed
 
 import bleach
+import os
 from smartypants import smartypants
 from lxml import etree
-import datetime
 import re
 import sqlalchemy
 from getpass import getpass
 
-# Set up app
-
-app = Flask(__name__)
-heroku_environment = os.getenv('HEROKU_ENVIRONMENT', None)
-if heroku_environment == 'production':
-    app.config.from_object(ProductionConfig)
-elif heroku_environment == 'development':
-    app.config.from_object(DevelopmentConfig)
-else:
-    raise Exception('Unrecognized or unset HEROKU_ENVIRONMENT variable')
-db = SQLAlchemy(app)
-
-# Schema/models
-
-users_roles = db.Table(
-    'users_roles', 
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('role_id', db.Integer, db.ForeignKey('role.id'))
-)
-
-posts_authors = db.Table(
-    'posts_authors', 
-    db.Column('post_id',   db.Integer, db.ForeignKey('post.id')),
-    db.Column('author_id', db.Integer, db.ForeignKey('user.id'))
-)
-
-posts_tags = db.Table(
-    'posts_tags', 
-    db.Column('post_id', db.Integer, db.ForeignKey('post.id')),
-    db.Column('tag_id',  db.Integer, db.ForeignKey('tag.id'))
-)
-
-class Role(db.Model, RoleMixin):
-
-    id          = db.Column(db.Integer, primary_key=True)
-    name        = db.Column(db.String(80), unique=True)
-    description = db.Column(db.String(200))
-
-class User(db.Model, UserMixin):
-
-    id           = db.Column(db.Integer, primary_key=True)
-    name         = db.Column(db.String(80))
-    display_name = db.Column(db.String(80), unique=True)
-    email        = db.Column(db.String(200), unique=True)
-    password     = db.Column(db.String(200))
-    active       = db.Column(db.Boolean)
-
-    last_login_at    = db.Column(db.DateTime)
-    current_login_at = db.Column(db.DateTime)
-    last_login_ip    = db.Column(db.String(40))
-    current_login_ip = db.Column(db.String(40))
-    login_count      = db.Column(db.Integer)
-
-    roles = db.relationship(
-        'Role', 
-        secondary=users_roles, 
-        backref=db.backref('users', lazy='dynamic')
-    )
-
-    def __repr__(self):
-        return '<User %d: %s>' % (self.id, self.email)
-
-class Post(db.Model):
-
-    id         = db.Column(db.Integer, primary_key=True)
-    title      = db.Column(db.String(300))
-    slug       = db.Column(db.String(80), unique=True)
-    body       = db.Column(db.Text)
-    created_at = db.Column(db.DateTime)
-    updated_at = db.Column(db.DateTime)
-
-    authors = db.relationship(
-        'User', 
-        secondary=posts_authors,
-        backref=db.backref('posts', lazy='dynamic')
-    )
-
-    tags = db.relationship(
-        'Tag',
-        secondary=posts_tags,
-        backref=db.backref('posts', lazy='dynamic')
-    )
-
-    def __init__(self, title, slug, body, 
-                 authors=[], tags=[],
-                 created_at=datetime.datetime.now(),
-                 updated_at=datetime.datetime.now()):
-        self.title      = title
-        self.slug       = slug
-        self.body       = body
-        self.authors    = authors
-        self.tags       = tags
-        self.created_at = created_at
-        self.updated_at = updated_at
-
-    def __repr__(self):
-        return '<Post %d: %s>' % (self.id, self.title)
-
-
-class Tag(db.Model):
-
-    id   = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), unique=True)
-    slug = db.Column(db.String(80), unique=True)
-
-    def __init__(self, name, slug):
-        self.name = name
-        self.slug = slug
-
-    def __repr__(self):
-        return '<Tag %d: %s>' % (self.id, self.name)
+from app import app
+from db import db, Role, User, Post, Tag, users_roles, posts_authors, posts_tags
+from forms import WriteForm
 
 # Set up Flask-Security
 
@@ -343,29 +227,6 @@ def blog_submit_post(post=None):
 
     flash(u'There were errors in your submission. Please check below.')
     return render_template('blog/write.html', form=form)
-
-# Forms
-
-class WriteForm(Form):
-
-    title = StringField(u'Title', \
-        [validators.Length(
-            min=1, max=300,
-            message=u'Your title must contain at least 1 character and no more than 300 characters.')
-        ])
-    slug = StringField(u'Slug', \
-        [validators.Length(
-            max=80,
-            message=u'Your slug must contain at most 80 characters'),
-         validators.Regexp(
-            regex=r'^[A-Za-z0-9\-]*$',
-            message=u'Your slug may only contain letters, numbers, and hyphens')
-        ])
-    tag_list = StringField(u'Tags')
-    body     = TextAreaField(u'Body')
-
-    convert_breaks = BooleanField(u'Convert line breaks to &lt;p&gt;')
-    use_smartypants = BooleanField(u'Use SmartyPants')
 
 # Routes
 

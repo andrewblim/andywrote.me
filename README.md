@@ -10,21 +10,23 @@ This is the code for my personal website. It is based on Flask and Postgres and 
 
 - Install the packages in `requirements.txt` with `pip install -r requirements.txt`. I strongly suggest you create a virtualenv and do it there! 
 
+- Set an environment variable `HEROKU_ENVIRONMENT` to "development". If you use virtualenvwrapper, you can edit your postactivate and postdeactivate hooks (in $VIRTUAL_ENV/bin) to set and unset automatically when you activate/deactivate your virtualenv. Use `export` to set it in postactivate so that it's visible as an environment variable. 
+
 - Install Postgres. If you are using OS X, I recommend Postgres.app, which is painless to install and easy to use. 
 
-- Create a new Postgres user `andywrote` and a new database `andywrote` as follows (thanks to this [handy no-frills guide](http://killtheyak.com/use-postgresql-with-django-flask/): 
+- Create a new Postgres user `andywrote` and a new database `andywrote-development` as follows (thanks to this [handy no-frills guide](http://killtheyak.com/use-postgresql-with-django-flask/): 
 
 ```
 $ createuser -U andywrote <yourusername>
 Shall the new role be a superuser? (y/n) n
 Shall the new role be allowed to create databases? (y/n) y
 Shall the new role be allowed to create more new roles? (y/n) n
-$ createdb -U <yourusername> -E utf8 -O <yourusername> andywrote -T template0
+$ createdb -U <yourusername> -E utf8 -O <yourusername> andywrote-development -T template0
 ```
 
 - Run a db migration with Alembic: `alembic upgrade head`
 
-- At this point you should be able to run `HEROKU_ENVIRONMENT=development python serve.py` to get your server up and running locally with Flask's local server, without touching Heroku. 
+- At this point you should be able to run `python serve.py` to get your server up and running locally with Flask's local server, without touching Heroku. 
 
 - Get a Heroku account, create your Heroku app, install the Heroku Toolbelt, login ([detailed instructions](https://devcenter.heroku.com/articles/quickstart)). 
 

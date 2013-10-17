@@ -18,17 +18,21 @@ fileConfig(config.config_file_name)
 import os, sys
 sys.path.append(os.getcwd())
 from andywrote import db
+from andywrote.config import ProductionConfig, TestingConfig, DevelopmentConfig
+
 target_metadata = db.metadata
 
 if os.getenv('HEROKU_ENVIRONMENT', None) == 'production':
-    database_url = os.getenv('DATABASE_URL')
-    if database_url is None:
-        raise Exception('Unset DATABASE_URL variable')
-    config.set_main_option('sqlalchemy.url', database_url)
+    database_url = ProductionConfig.SQLALCHEMY_DATABASE_URI
+elif os.getenv('HEROKU_ENVIRONMENT', None) == 'testing':
+    database_url = TestingConfig.SQLALCHEMY_DATABASE_URI
 elif os.getenv('HEROKU_ENVIRONMENT', None) == 'development':
-    pass
+    database_url = DevelopmentConfig.SQLALCHEMY_DATABASE_URI
 else:
     raise Exception('Unrecognized or unset HEROKU_ENVIRONMENT variable')
+if database_url is None:
+    raise Exception('SQLALCHEMY_DATABASE_URI variable unset in environment')
+config.set_main_option('sqlalchemy.url', database_url)
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
