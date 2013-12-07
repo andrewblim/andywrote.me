@@ -125,6 +125,27 @@ def find_or_create_tag_by_name(tag_name, field_length=80):
         db.session.add(tag)
     return tag
 
+
+# clean_post_text
+# Returns sanitized version of text, raises ValidationError if it doesn't parse
+# into valid HTML. 
+
+def clean_post_text(text, convert_breaks=False, use_smartypants=False):
+    if convert_breaks:
+        text = re.sub('\n\n+', '\n</p>\n<p>\n', text)
+        text = "<p>\n%s\n</p>" % text
+        text = re.sub(r'<p><h([1-6])>', r'<h\1>', text)
+        text = re.sub(r'</\s*h([1-6])><\/p>', r'</h\1>', text)
+    if use_smartypants:
+        text = smartypants(text)
+    try:
+        text_parse = "<article>%s</article>"
+        etree.fromstring(text_parse)
+    except etree.XMLSyntaxError:
+        form.text.errors.append("Body appears to be improper HTML (forget to close a tag?).")
+        raise ValidationError
+    return text
+
 # blog_submit_post
 # This is used both by /blog/write to generate new posts and by
 # /blog/posts/<post-slug>/edit to edit and save existing posts. 
@@ -137,31 +158,19 @@ def blog_submit_post(post=None):
         # pre-validation sanitization
         title    = bleach.clean(form.title.data, tags=[])
         tag_list = bleach.clean(form.tag_list.data, tags=[])
-        tag_list = re.sub('\s+', ' ', tag_list) \
-                             .strip()
+        tag_list = re.sub('\s+', ' ', tag_list).strip()
         body     = bleach.clean(form.body.data, tags=allowed_tags_body)
 
         if form.validate():
             try:
 
-                # Convert line breaks/apply smartypants as needed, then verify 
-                # that body is well-formed
+                # Convert line breaks/apply smartypants as needed
 
-                if form.convert_breaks.data:
-                    body = re.sub('\n\n+', '\n</p>\n<p>\n', body)
-                    body = "<p>\n%s\n</p>" % body
-                    body = re.sub(r'<p><h([1-6])>', r'<h\1>', body)
-                    body = re.sub(r'</\s*h([1-6])><\/p>', r'</h\1>', body)
+                body = clean_post_text(body,
+                                       form.convert_breaks.data,
+                                       form.use_smartypants.data)
                 if form.use_smartypants.data:
                     title = smartypants(title)
-                    body = smartypants(body)
-
-                try:
-                    body_parse = "<article>%s</article>"
-                    etree.fromstring(body_parse)
-                except etree.XMLSyntaxError:
-                    form.body.errors.append("Body appears to be improper HTML (forget to close a tag?).")
-                    raise ValidationError
 
                 # Get list of tag names
 
@@ -199,12 +208,13 @@ def blog_submit_post(post=None):
                 # If it's not new, edit post
 
                 else:
-                    post.title    = title
-                    post.body     = body
-                    post.slug     = slug_title
-                    post.authors  = [current_user]
-                    tags_removed = filter(lambda x: x.name not in tag_list, post.tags)
-                    post.tags     = []
+                    post.title     = title
+                    post.body      = body
+                    post.slug      = slug_title
+                    post.authors   = [current_user]
+                    post.published = form.published.data
+                    tags_removed   = filter(lambda x: x.name not in tag_list, post.tags)
+                    post.tags      = []
                     for tag_name in tag_list:
                         tag = find_or_create_tag_by_name(tag_name)
                         post.tags.append(tag)
@@ -227,6 +237,30 @@ def blog_submit_post(post=None):
 
     flash(u'There were errors in your submission. Please check below.')
     return render_template('blog/write.html', form=form)
+
+# Forms
+
+class WriteForm(Form):
+
+    title = StringField(u'Title', \
+        [validators.Length(
+            min=1, max=300,
+            message=u'Your title must contain at least 1 character and no more than 300 characters.')
+        ])
+    slug = StringField(u'Slug', \
+        [validators.Length(
+            max=80,
+            message=u'Your slug must contain at most 80 characters'),
+         validators.Regexp(
+            regex=r'^[A-Za-z0-9\-]*$',
+            message=u'Your slug may only contain letters, numbers, and hyphens')
+        ])
+    tag_list = StringField(u'Tags')
+    body     = TextAreaField(u'Body')
+
+    convert_breaks = BooleanField(u'Convert line breaks to &lt;p&gt;')
+    use_smartypants = BooleanField(u'Use SmartyPants')
+    published = BooleanField(u'Publish')
 
 # Routes
 
@@ -264,13 +298,25 @@ def blog_manage():
                       .all()
     return render_template('blog/manage.html', posts=posts)
 
+
+# Post-specific routes
+
 @app.route('/blog/posts/<post_slug>')
 def blog_post(post_slug):
     post = Post.query.filter_by(slug=post_slug) \
                      .first()
+    if post is None or not post.published:
+        abort(404)
+    return render_template('blog/post.html', post=post, preview=False)
+
+@app.route('/blog/posts/<post_slug>/preview')
+@login_required
+def blog_post_preview(post_slug):
+    post = Post.query.filter_by(slug=post_slug) \
+                     .first()
     if post is None:
         abort(404)
-    return render_template('blog/post.html', post=post)
+    return render_template('blog/post.html', post=post, preview=True)
 
 @app.route('/blog/posts/<post_slug>/edit')
 @login_required
@@ -279,7 +325,7 @@ def blog_edit_post(post_slug):
                      .first()
     if post is None:
         abort(404)
-    form=WriteForm()
+    form = WriteForm()
     form.title.data    = post.title
     form.slug.data     = post.slug
     form.tag_list.data = ', '.join(map(lambda x: x.name, post.tags))

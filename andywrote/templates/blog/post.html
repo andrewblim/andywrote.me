@@ -1,5 +1,10 @@
 {% extends "blog/base.html" %}
 {% block title %}andywrote.me | blog{% endblock %}
 {% block content %}
+  {%- if preview is defined and preview -%}
+    <div class="preview-notification">
+      Preview
+    </div>
+  {%- endif -%}
   {%- include 'blog/_post_individual.html' -%}
 {% endblock %}

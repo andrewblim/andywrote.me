@@ -13,7 +13,9 @@
 </p>
 {%- else -%}
   {%- for post in posts -%}
-    {%- include 'blog/_post_individual.html' -%}
+    {%- if post.published -%}
+      {%- include 'blog/_post_individual.html' -%}
+    {%- endif -%}
   {%- endfor -%}
 {%- endif -%}
 {% endblock %}

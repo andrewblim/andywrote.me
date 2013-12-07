@@ -80,7 +80,18 @@
     Use <a href="http://daringfireball.net/projects/smartypants/">SmartyPants</a> (curls quotation marks except in tags like &lt;pre&gt;, etc.)
   </div>
   <div>
+    {%- if post is defined and not post.published -%}
+      {{ form.published(id="publish") }}
+    {%- else -%}
+      {{ form.published(id="publish", checked=True) }}
+    {%- endif -%}
+    Publish (uncheck to save as draft)
+  </div>
+  <div>
     <input type="submit" value="Post" />
+    {%- if post is defined -%}
+      <input type="button" id="preview" value="Preview" onclick="window.open('/blog/posts/{{ post.slug }}/preview')" />
+    {%- endif -%}
   </div>
 </form>
 {% endblock %}
