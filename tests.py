@@ -13,5 +13,8 @@ class AndywroteTestCase(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_trivial(self):
+        print('test')
+
 if __name__ == '__main__':
     unittest.main()

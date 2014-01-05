@@ -4,7 +4,7 @@
 
 This is the code for my personal website. It is based on Flask and Postgres and is intended to be deployed through Heroku. I have not been wholly disciplined about writing the code in a generic, reusable manner, but it shouldn't be too bad for you to take this code and run your own site should you be interested. 
 
-## Get up and running locally
+## Get a development environment up and running locally
 
 - Install Python (any reasonably up-to-date version of Python 2; I haven't tested anything with Python 3). Install pip. 
 
@@ -14,17 +14,19 @@ This is the code for my personal website. It is based on Flask and Postgres and 
 
 - Install Postgres. If you are using OS X, I recommend Postgres.app, which is painless to install and easy to use. 
 
-- Create a new Postgres user `andywrote` and a new database `andywrote-development` as follows (thanks to this [handy no-frills guide](http://killtheyak.com/use-postgresql-with-django-flask/): 
+- Create a new Postgres user `andywrote` and new databases `andywrote`, `andywrote-development`, and `andywrote-testing` as follows (thanks to this [handy no-frills guide](http://killtheyak.com/use-postgresql-with-django-flask/): 
 
 ```
-$ createuser -U andywrote <yourusername>
+$ createuser andywrote
 Shall the new role be a superuser? (y/n) n
 Shall the new role be allowed to create databases? (y/n) y
 Shall the new role be allowed to create more new roles? (y/n) n
-$ createdb -U <yourusername> -E utf8 -O <yourusername> andywrote-development -T template0
+$ createdb -U andywrote -O andywrote -E utf8 -T template0 andywrote
+$ createdb -U andywrote -O andywrote -E utf8 -T template0 andywrote-development
+$ createdb -U andywrote -O andywrote -E utf8 -T template0 andywrote-testing
 ```
 
-- Run a db migration with Alembic: `alembic upgrade head`
+- Run a migration with Alembic in the development db: `alembic upgrade head`. If you want to run tests you may also want to run `HEROKU_ENVIRONMENT=testing alembic upgrade head`. 
 
 - At this point you should be able to run `python serve.py` to get your server up and running locally with Flask's local server, without touching Heroku. 
 

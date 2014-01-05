@@ -5,6 +5,9 @@ from flask.ext.security import Security, SQLAlchemyUserDatastore, login_required
 from flask.ext.login import current_user
 from flask.ext.security.utils import encrypt_password
 
+from alembic.config import Config
+from alembic import command
+
 from wtforms.validators import ValidationError
 from urlparse import urljoin
 from werkzeug.contrib.atom import AtomFeed
@@ -17,7 +20,7 @@ import re
 import sqlalchemy
 from getpass import getpass
 
-from app import app
+from app import app, config_app_heroku
 from db import db, Role, User, Post, Tag, users_roles, posts_authors, posts_tags
 from forms import WriteForm
 
@@ -55,10 +58,6 @@ allowed_tags_body = [
     'ul',
 ]
 
-# Initialize db
-
-def initialize_db():
-    pass
 
 def create_user(**kwargs):
     if 'email' not in kwargs:
