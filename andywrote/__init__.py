@@ -1,2 +1,2 @@
 from andywrote import *
-import config
+from app import app, config_app_heroku
