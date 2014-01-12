@@ -90,6 +90,14 @@ def delete_user_by_display_name(display_name):
     else:
         raise sqlalchemy.orm.exc.NoResultFound('No user found with display name %s' % display_name)
 
+def delete_all_records():
+    for user in User.query:
+        user_datastore.delete_user(user)
+    Post.query.delete()
+    Tag.query.delete()
+    db.session.commit()
+
+
 # generate_slug
 # Used to generate stubs for URLs, i.e. a post titled "This is my fancy pants
 # post" might have a slug of this-is-my-fancy-pants-post. 

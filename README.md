@@ -17,7 +17,7 @@ This is the code for my personal website. It is based on Flask and Postgres and 
 - Create a new Postgres user `andywrote` and new databases `andywrote`, `andywrote-development`, and `andywrote-testing` as follows (thanks to this [handy no-frills guide](http://killtheyak.com/use-postgresql-with-django-flask/): 
 
 ```
-$ createuser andywrote
+$ createuser andywrote # if not prompted here you can always ALTER ROLE
 Shall the new role be a superuser? (y/n) n
 Shall the new role be allowed to create databases? (y/n) y
 Shall the new role be allowed to create more new roles? (y/n) n
